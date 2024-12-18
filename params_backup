@@ -1,0 +1,7 @@
+seed=1
+infection_chance_per_day=0.2/0.3/0.2/0.2/0.1/0.1/0.1
+days_of_simulation=30
+num_init_cases=10/5
+output_dir=test_dir
+do_log=True
+total_runs=10

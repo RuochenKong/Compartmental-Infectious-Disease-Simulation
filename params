@@ -1,0 +1,8 @@
+seed=3
+infection_chance_per_day=0.2/0.3/0.2
+days_of_simulation=20
+total_runs=5
+num_threads=3
+num_init_cases=5/5
+output_dir=test_gui
+do_log=True
