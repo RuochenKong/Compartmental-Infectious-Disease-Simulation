@@ -73,14 +73,14 @@ for chunk in chunked_data:
 transport_data = pd.concat(chunk_list)
 
 pop_data = pd.read_csv('src_data/usa_population_revise.csv', dtype=np.int64)
-src_cbg_names = list(transport_data['poi_cbg_source'].unique())
-n_src_CBG = len(src_cbg_names)
+airport_cbg = pd.read_csv('src_data/airports_geoinfo.csv', dtype={'GeoId':np.int64})
+airport_cbg = list(airport_cbg['GeoId'])
 
 group_by_src = transport_data.groupby('poi_cbg_source')
 group_by_des = transport_data.groupby('poi_cbg_destination')
 
 simu_args = [days_of_simulation, num_init_cases, list_init_cbg, infection_chance_per_day,
-             pop_data, src_cbg_names, group_by_src, group_by_des, fn_simu, fn_log]
+             pop_data, airport_cbg, group_by_src, group_by_des, fn_simu, fn_log]
 
 k = 0
 while total_runs > 0:

@@ -1,0 +1,62 @@
+iata_code,GeoId,id,ident,type,name,latitude,longitude,iso_country,municipality,gps_code,country,region
+MEM,471579801001,3675,KMEM,large_airport,Memphis International Airport,35.0424,-89.9767,US,Memphis,KMEM,US,TN
+BOS,250259813001,3422,KBOS,large_airport,Logan International Airport,42.36197,-71.0079,US,Boston,KBOS,US,MA
+SMF,060670071011,3892,KSMF,large_airport,Sacramento International Airport,38.6954,-121.591003,US,Sacramento,KSMF,US,CA
+RDU,371839801001,3844,KRDU,large_airport,Raleigh Durham International Airport,35.877602,-78.787498,US,Raleigh/Durham,KRDU,US,NC
+BWI,240039800001,3435,KBWI,large_airport,Baltimore/Washington International Thurgood Marshall Airport,39.1754,-76.668297,US,Baltimore,KBWI,US,MD
+SFO,060819843001,3878,KSFO,large_airport,San Francisco International Airport,37.619806,-122.374821,US,San Francisco,KSFO,US,CA
+HNL,150039802001,5453,PHNL,large_airport,Daniel K Inouye International Airport,21.32062,-157.924228,US,Honolulu,PHNL,US,HI
+STL,291892218003,3905,KSTL,large_airport,St Louis Lambert International Airport,38.748697,-90.370003,US,St Louis,KSTL,US,MO
+IAH,482019801001,3604,KIAH,large_airport,George Bush Intercontinental Houston Airport,29.984399795532227,-95.34140014648438,US,Houston,KIAH,US,TX
+SRQ,120810009024,3899,KSRQ,large_airport,Sarasota Bradenton International Airport,27.394631,-82.554359,US,Sarasota/Bradenton,KSRQ,US,FL
+MKE,550790217005,3690,KMKE,large_airport,General Mitchell International Airport,42.947201,-87.896599,US,Milwaukee,KMKE,US,WI
+ONT,060710016002,3752,KONT,large_airport,Ontario International Airport,34.056,-117.600998,US,Ontario,KONT,US,CA
+ORF,517109803001,3755,KORF,large_airport,Norfolk International Airport,36.895341,-76.201,US,Norfolk,KORF,US,VA
+ATL,130639800001,3384,KATL,large_airport,Hartsfield Jackson Atlanta International Airport,33.6367,-84.428101,US,Atlanta,KATL,US,GA
+DFW,484399800001,3488,KDFW,large_airport,Dallas Fort Worth International Airport,32.896801,-97.038002,US,Dallas-Fort Worth,KDFW,US,TX
+BUF,360290100012,3431,KBUF,large_airport,Buffalo Niagara International Airport,42.940498,-78.732201,US,Buffalo,KBUF,US,NY
+SEA,530330284024,3875,KSEA,large_airport,Seattle–Tacoma International Airport,47.447943,-122.310276,US,Seattle,KSEA,US,WA
+RNO,320319800001,3853,KRNO,large_airport,Reno Tahoe International Airport,39.4991,-119.767998,US,Reno,KRNO,US,NV
+FLL,120110802001,3531,KFLL,large_airport,Fort Lauderdale Hollywood International Airport,26.072599,-80.152702,US,Fort Lauderdale,KFLL,US,FL
+SAN,060730062001,3862,KSAN,large_airport,San Diego International Airport,32.7336006165,-117.190002441,US,San Diego,KSAN,US,CA
+OAK,060014090002,3744,KOAK,large_airport,San Francisco Bay Oakland International Airport,37.720085,-122.221184,US,Oakland,KOAK,US,CA
+LGA,360810331001,3643,KLGA,large_airport,LaGuardia Airport,40.777199,-73.872597,US,New York,KLGA,US,NY
+OMA,310550005001,3751,KOMA,large_airport,Eppley Airfield,41.3032,-95.894096,US,Omaha,KOMA,US,NE
+PVD,440039800001,3795,KPVD,large_airport,Theodore Francis Green State Airport,41.725038,-71.425668,US,Warwick,KPVD,US,RI
+SYR,360670144002,3913,KSYR,large_airport,Syracuse Hancock International Airport,43.11119842529297,-76.1063003540039,US,Syracuse,KSYR,US,NY
+MSY,220519800001,3711,KMSY,large_airport,Louis Armstrong New Orleans International Airport,29.993401,-90.258003,US,New Orleans,KMSY,US,LA
+MSP,270539800001,3709,KMSP,large_airport,Minneapolis–Saint Paul International Airport / Wold–Chamberlain Field,44.880081,-93.221741,US,Minneapolis,KMSP,US,MN
+SFB,121170210001,3876,KSFB,large_airport,Orlando Sanford International Airport,28.7775993347168,-81.23750305175781,US,Orlando,KSFB,US,FL
+DTW,261639854001,3497,KDTW,large_airport,Detroit Metropolitan Wayne County Airport,42.21377,-83.353786,US,Detroit,KDTW,US,MI
+ORD,170319800001,3754,KORD,large_airport,Chicago O'Hare International Airport,41.9786,-87.9048,US,Chicago,KORD,US,IL
+MDW,170319801001,3673,KMDW,large_airport,Chicago Midway International Airport,41.785999,-87.752403,US,Chicago,KMDW,US,IL
+RIC,510879801001,3847,KRIC,large_airport,Richmond International Airport,37.505199,-77.319702,US,Richmond,KRIC,US,VA
+IAD,511079801001,3602,KIAD,large_airport,Washington Dulles International Airport,38.9445,-77.455803,US,Dulles,KIAD,US,VA
+MCO,120950168022,3670,KMCO,large_airport,Orlando International Airport,28.429399490356445,-81.30899810791016,US,Orlando,KMCO,US,FL
+PBI,120999805001,3766,KPBI,large_airport,Palm Beach International Airport,26.683201,-80.095596,US,West Palm Beach,KPBI,US,FL
+DCA,510139802001,3483,KDCA,large_airport,Ronald Reagan Washington National Airport,38.8521,-77.037697,US,Washington,KDCA,US,DC
+CLE,390359805001,3454,KCLE,large_airport,Cleveland Hopkins International Airport,41.411701,-81.8498,US,Cleveland,KCLE,US,OH
+SAT,480299800041,3863,KSAT,large_airport,San Antonio International Airport,29.533701,-98.469803,US,San Antonio,KSAT,US,TX
+AUS,484539800001,3386,KAUS,large_airport,Austin Bergstrom International Airport,30.197535,-97.662015,US,Austin,KAUS,US,TX
+EWR,340139802001,3521,KEWR,large_airport,Newark Liberty International Airport,40.692501,-74.168701,US,Newark,KEWR,US,NJ
+PIT,420034520001,3778,KPIT,large_airport,Pittsburgh International Airport,40.491501,-80.232903,US,Pittsburgh,KPIT,US,PA
+CMH,390499800001,3458,KCMH,large_airport,John Glenn Columbus International Airport,39.998001,-82.891899,US,Columbus,KCMH,US,OH
+OGG,150090319001,5455,PHOG,large_airport,Kahului International Airport,20.896263,-156.431837,US,Kahului,PHOG,US,HI
+CVG,210159801001,3471,KCVG,large_airport,Cincinnati Northern Kentucky International Airport,39.048801,-84.667801,US,Cincinnati / Covington,KCVG,US,KY
+PDX,410510073001,3768,KPDX,large_airport,Portland International Airport,45.588699,-122.598,US,Portland,KPDX,US,OR
+RSW,120719800001,3858,KRSW,large_airport,Southwest Florida International Airport,26.53619956970215,-81.75520324707031,US,Fort Myers,KRSW,US,FL
+SJC,060855051002,3883,KSJC,large_airport,Norman Y. Mineta San Jose International Airport,37.362452,-121.929188,US,San Jose,KSJC,US,CA
+SDF,211119801001,3873,KSDF,large_airport,Louisville Muhammad Ali International Airport,38.1744,-85.736,US,Louisville,KSDF,US,KY
+PHL,420459800001,3771,KPHL,large_airport,Philadelphia International Airport,39.871899,-75.241096,US,Philadelphia,KPHL,US,PA
+CLT,371199801001,3457,KCLT,large_airport,Charlotte Douglas International Airport,35.2140007019043,-80.94309997558594,US,Charlotte,KCLT,US,NC
+JFK,360810716001,3622,KJFK,large_airport,John F Kennedy International Airport,40.639447,-73.779317,US,New York,KJFK,US,NY
+OKC,401091071011,3747,KOKC,large_airport,Will Rogers World Airport,35.393388,-97.598248,US,Oklahoma City,KOKC,US,OK
+TPA,120579806001,3926,KTPA,large_airport,Tampa International Airport,27.9755,-82.533203,US,Tampa,KTPA,US,FL
+ANC,020200023011,5388,PANC,large_airport,Ted Stevens Anchorage International Airport,61.179004,-149.992561,US,Anchorage,PANC,US,AK
+SLC,490359800001,3887,KSLC,large_airport,Salt Lake City International Airport,40.78886,-111.979866,US,Salt Lake City,KSLC,US,UT
+LAX,060379800281,3632,KLAX,large_airport,Los Angeles International Airport,33.942501,-118.407997,US,Los Angeles,KLAX,US,CA
+JAX,120310103011,3620,KJAX,large_airport,Jacksonville International Airport,30.492469,-81.687813,US,Jacksonville,KJAX,US,FL
+MIA,120869805001,3685,KMIA,large_airport,Miami International Airport,25.79319953918457,-80.29060363769531,US,Miami,KMIA,US,FL
+PWM,230050020022,3796,KPWM,large_airport,Portland International Jetport,43.646198,-70.309303,US,Portland,KPWM,US,ME
+LAS,320030068004,3631,KLAS,large_airport,Harry Reid International Airport,36.083361,-115.151817,US,Las Vegas,KLAS,US,NV
+BNA,470379801001,3420,KBNA,large_airport,Nashville International Airport,36.1245,-86.6782,US,Nashville,KBNA,US,TN

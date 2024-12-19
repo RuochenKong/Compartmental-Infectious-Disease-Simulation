@@ -11,7 +11,7 @@ class InputPlatform(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("Simulation Parameters")
+        self.setWindowTitle("Input Platform")
 
         # Create layout
         self.layout = QVBoxLayout()
@@ -19,13 +19,13 @@ class InputPlatform(QWidget):
         # Input fields
         self.inputs = {}
         variable_descriptions = {'seed': 'Random seed',
-                                 'infection_chance_per_day': 'Chance of an Infectious agent to spread per day, sum to R0',
-                                 'days_of_simulation': 'Total days to simulate',
-                                 'total_runs': 'Numbers of simulation runs',
-                                 'num_threads': 'Numbers of simulations running simultaneously',
-                                 'list_init_cbg': 'List of Census Block Groups having initial cases',
-                                 'num_init_cases': 'Numbers of initial cases per CBG',
-                                 'output_dir': 'Folder to store simulation results'}
+                                   'infection_chance_per_day': 'Chance of an Infectious agent to spread per day, sum to R0',
+                                   'days_of_simulation': 'Total days to simulate',
+                                   'total_runs': 'Numbers of simulation runs',
+                                   'num_threads': 'Numbers of simulations running simultaneously',
+                                   'list_init_cbg': 'List of Census Block Groups having initial cases',
+                                   'num_init_cases': 'Numbers of initial cases per CBG',
+                                   'output_dir': 'Folder to store simulation results'}
 
         label_font = QFont("Arial", 12, QFont.Bold)
         description_font = QFont("Arial", 10, QFont.StyleItalic)
@@ -68,7 +68,7 @@ class InputPlatform(QWidget):
         self.setLayout(self.layout)
 
     def run_simulation(self):
-        subprocess.Popen(["python", "mkypox_main.py"])
+        subprocess.Popen(["python", ".\\mkypox_main.py"])
 
     def save_to_file(self):
         # Get values from input fields

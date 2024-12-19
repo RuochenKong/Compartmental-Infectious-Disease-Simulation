@@ -51,12 +51,10 @@ def initCounter(pop_data, N):
 
 
 # Initiate the disease
-def initCase(counter, new_case_nums, new_case_CBGs, src_cbg_names,random):
+def initCase(counter, new_case_nums, new_case_CBGs, airport_cbg,random):
     if new_case_CBGs is None:
-        new_case_CBGs = []
-        for i in range(len(new_case_nums)):
-            n_src_CBG = len(src_cbg_names)
-            new_case_CBGs.append(src_cbg_names[random.randint(0, n_src_CBG - 1)])
+        random.shuffle(airport_cbg)
+        new_case_CBGs = [airport_cbg[i] for i in range(min(len(new_case_nums), len(airport_cbg)))]
 
     index = len(counter)
     active_cases = []  # list of [cbg, num_day]
@@ -118,11 +116,11 @@ def nextDay(counter, active_cases, current_day, group_by_src, group_by_des, infe
 
 
 def main(days_of_simulation, num_init_cases, list_init_cbg, infection_chance_per_day,
-         pop_data, src_cbg_names, group_by_src, group_by_des, fn_simu, fn_log, simu_id,random):
+         pop_data, airport_cbg, group_by_src, group_by_des, fn_simu, fn_log, simu_id,random):
     f_log = None if fn_log is None else open(fn_log%simu_id, 'w')
     N = len(pop_data)
     simu_counter = initCounter(pop_data, N)
-    active_cases = initCase(simu_counter, num_init_cases, list_init_cbg, src_cbg_names,random)
+    active_cases = initCase(simu_counter, num_init_cases, list_init_cbg, airport_cbg,random)
     for i in tqdm(range(2, days_of_simulation + 1)):
         nextDay(simu_counter, active_cases, i, group_by_src, group_by_des, infection_chance_per_day, f_log,random)
     simu_counter.iloc[N:].to_csv(fn_simu % simu_id, index=False)
