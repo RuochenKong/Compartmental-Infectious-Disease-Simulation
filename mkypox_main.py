@@ -22,6 +22,8 @@ output_dir = 'output_data/'
 do_log = False
 simu_id = 0
 
+from_airport = True
+
 # Reset parameters with Input file
 try:
     with open('params') as f_param:
@@ -49,6 +51,8 @@ try:
                     os.makedirs(output_dir, exist_ok=True)
             elif line[0] == 'do_log':
                 do_log = line[1] == 'True'
+            elif line[0] == 'from_airport':
+                from_airport = line[1] == 'True'
             # TODO: map list of Airports to List of CBGs
 except:  # No custom parameters provided
     pass
@@ -71,6 +75,7 @@ chunk_list = []
 for chunk in chunked_data:
     chunk_list.append(chunk)
 transport_data = pd.concat(chunk_list)
+src_cbg_names = list(transport_data['poi_cbg_source'].unique())
 
 pop_data = pd.read_csv('src_data/usa_population_revise.csv', dtype=np.int64)
 airport_cbg = pd.read_csv('src_data/airports_geoinfo.csv', dtype={'GeoId':np.int64})
@@ -80,7 +85,7 @@ group_by_src = transport_data.groupby('poi_cbg_source')
 group_by_des = transport_data.groupby('poi_cbg_destination')
 
 simu_args = [days_of_simulation, num_init_cases, list_init_cbg, infection_chance_per_day,
-             pop_data, airport_cbg, group_by_src, group_by_des, fn_simu, fn_log]
+             pop_data, from_airport, airport_cbg, src_cbg_names, group_by_src, group_by_des, fn_simu, fn_log]
 
 k = 0
 while total_runs > 0:
