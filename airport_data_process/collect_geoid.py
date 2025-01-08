@@ -2,7 +2,7 @@ import subprocess
 import pandas as pd
 import os
 
-api_command = 'curl --form x=@longitude --form y=@latitude --form benchmark=2020 --form vintage=2020 https://geocoding.geo.census.gov/geocoder/geographies/coordinates --output @output'
+api_command = 'curl --form x=@longitude --form y=@latitude --form benchmark=2020 --form vintage=2010 https://geocoding.geo.census.gov/geocoder/geographies/coordinates --output @output'
 out_dir = 'raw_api_output'
 us_airports = pd.read_csv('../src_data/large_airports.csv')
 us_airports = us_airports[us_airports['iso_country'] == 'US'].reset_index(drop=True)
