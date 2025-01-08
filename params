@@ -1,7 +1,7 @@
-seed=0
-infection_chance_per_day=0.2/0.3/0.3/0.3/0.2/0.1
+seed=3
+infection_chance_per_day=0.1/0.3/0.3/0.2/0.2
 days_of_simulation=10
 total_runs=4
 num_threads=4
-num_init_cases=10/10
-output_dir=test_out
+num_init_cases=10/10/5/5
+output_dir=test
