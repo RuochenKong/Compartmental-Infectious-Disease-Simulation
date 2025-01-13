@@ -20,6 +20,7 @@ num_init_cases = [10]
 list_init_cbg = None
 output_dir = 'output_data/'
 do_log = False
+do_spread = False
 simu_id = 0
 
 from_airport = True
@@ -51,6 +52,8 @@ try:
                     os.makedirs(output_dir, exist_ok=True)
             elif line[0] == 'do_log':
                 do_log = line[1] == 'True'
+            elif line[0] == 'do_spread':
+                do_spread = line[1] == 'True'
             elif line[0] == 'from_airport':
                 from_airport = line[1] == 'True'
             # TODO: map list of Airports to List of CBGs
@@ -65,6 +68,7 @@ except:  # No id specified
     pass
 
 # Open output files
+fn_spread = output_dir + 'spreading_history_%d.csv' if do_spread else None
 fn_log = output_dir + 'log_simu_%d.log' if do_log else None
 fn_simu = output_dir + 'simu_%d.csv'
 
@@ -85,7 +89,8 @@ group_by_src = transport_data.groupby('poi_cbg_source')
 group_by_des = transport_data.groupby('poi_cbg_destination')
 
 simu_args = [days_of_simulation, num_init_cases, list_init_cbg, infection_chance_per_day,
-             pop_data, from_airport, airport_cbg, src_cbg_names, group_by_src, group_by_des, fn_simu, fn_log]
+             pop_data, from_airport, airport_cbg, src_cbg_names, group_by_src, group_by_des,
+             fn_simu, fn_spread, fn_log]
 
 k = 0
 while total_runs > 0:

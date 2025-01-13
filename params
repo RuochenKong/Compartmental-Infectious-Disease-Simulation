@@ -6,3 +6,4 @@ num_threads=4
 num_init_cases=10/10
 output_dir=test_out
 from_airport=False
+do_spread=True
