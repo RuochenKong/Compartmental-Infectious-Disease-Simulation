@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
-
-from tqdm import tqdm
+from datetime import datetime
 
 
 # HELPER FUNCTIONS
@@ -66,7 +65,7 @@ def initCase_from_des(counter, new_case_nums, new_case_airports, airport_cbg, gr
 
     index = len(counter)
     active_cases = []  # list of [cbg, num_day, case_id]
-    if f_spread is not None: f_spread.write('Day, From, To\n')  # Spreading Tree
+    if f_spread is not None: f_spread.write('Day, CBG(from), id(from), CBG(to), id(to)\n')  # Spreading Tree
 
     for cbg, cases in init_cases.items():
         sus_num = counter[counter['cbg'] == cbg].iloc[-1]['susceptible']
@@ -74,9 +73,8 @@ def initCase_from_des(counter, new_case_nums, new_case_airports, airport_cbg, gr
         index += 1
 
         for i in range(cases):
-            case_id = '%012d-%d'%(cbg, i+1)
-            active_cases.append([cbg, 0, case_id])
-            if f_spread is not None: f_spread.write('1, SIMU, %s\n'%case_id)
+            active_cases.append([cbg, 0, i+1])
+            if f_spread is not None: f_spread.write('1, 000000000000, -1, %012d, %d\n'%(cbg, i+1))
     return active_cases
 
 
@@ -88,7 +86,7 @@ def initCase_from_src(counter, new_case_nums, new_case_CBGs, src_cbg_names, f_sp
 
     index = len(counter)
     active_cases = []  # list of [cbg, num_day, case_id]
-    if f_spread is not None: f_spread.write('Day, From, To\n')  # Spreading Tree
+    if f_spread is not None: f_spread.write('Day, CBG(from), id(from), CBG(to), id(to)\n')  # Spreading Tree
 
     for case_num, case_cbg in zip(new_case_nums, new_case_CBGs):
         sus_num = counter[counter['cbg'] == case_cbg].iloc[-1]['susceptible']
@@ -98,9 +96,8 @@ def initCase_from_src(counter, new_case_nums, new_case_CBGs, src_cbg_names, f_sp
         index += 1
 
         for i in range(case_num):
-            case_id = '%012d-%d'%(case_cbg, i+1)
-            active_cases.append([case_cbg, 0, case_id])
-            if f_spread is not None: f_spread.write('1, SIMU, %s\n'%case_id)
+            active_cases.append([case_cbg, 0, i+1])
+            if f_spread is not None: f_spread.write('1, 000000000000, -1, %012d, %d\n'%(case_cbg, i+1))
 
     return active_cases
 
@@ -132,13 +129,13 @@ def nextDay(counter, active_cases, current_day, group_by_src, group_by_des, infe
                 index += 1
 
                 # collect new case
-                des_case_id = '%012d-%d'%(rev_src_cbg, num_infectious + num_recovered)
+                des_case_id = num_infectious + num_recovered
                 new_active_cases.append([rev_src_cbg, 0, des_case_id])
                 if f_log is not None: f_log.write(
                     'Day#%d %s infected %s\n' % (current_day, active_cases[i], rev_src_cbg))
 
                 # update spreading tree
-                if f_spread is not None: f_spread.write('%d, %s, %s\n'%(current_day, src_case_id, des_case_id))
+                if f_spread is not None: f_spread.write('%d, %012d, %d, %012d, %d\n'%(current_day, src_cbg, src_case_id, rev_src_cbg, des_case_id))
         else:
             if f_log is not None: f_log.write('Day#%d %s causes nothing\n' % (current_day, active_cases[i]))
 
@@ -159,6 +156,7 @@ def nextDay(counter, active_cases, current_day, group_by_src, group_by_des, infe
 
 def main(days_of_simulation, num_init_cases, list_init_cbg, infection_chance_per_day,
          pop_data, from_airport, airport_cbg, src_cbg_names, group_by_src, group_by_des, fn_simu, fn_spread, fn_log, simu_id,random):
+    print('Simu #%d started at %s'%(simu_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
     f_spread = None if fn_spread is None else open(fn_spread%simu_id, 'w')
     f_log = None if fn_log is None else open(fn_log%simu_id, 'w')
     N = len(pop_data)
@@ -167,8 +165,13 @@ def main(days_of_simulation, num_init_cases, list_init_cbg, infection_chance_per
         active_cases = initCase_from_des(simu_counter, num_init_cases, list_init_cbg, airport_cbg, group_by_des, f_spread, random)
     else:
         active_cases = initCase_from_src(simu_counter, num_init_cases,list_init_cbg, src_cbg_names, f_spread, random)
-    for i in tqdm(range(2, days_of_simulation + 1)):
+    for i in range(2, days_of_simulation + 1):
         nextDay(simu_counter, active_cases, i, group_by_src, group_by_des, infection_chance_per_day, f_spread, f_log,random)
+        if i%10 == 0:
+            print('  Simu #%d finished Day%d'%(simu_id, i))
     simu_counter.iloc[N:].to_csv(fn_simu % simu_id, index=False)
     if f_log is not None: f_log.close()
     if f_spread is not None: f_spread.close()
+    print('Simu #%d completed at %s'%(simu_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+
+
