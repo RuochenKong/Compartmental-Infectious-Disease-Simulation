@@ -1,0 +1,9 @@
+seed=0
+infection_chance_per_day=0.2/0.3/0.3/0.2/0.2/0.1
+days_of_simulation=90
+total_runs=4
+num_threads=4
+num_init_cases=10/10
+output_dir=sample_output
+from_airport=True
+do_spread=True
