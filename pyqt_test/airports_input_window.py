@@ -106,7 +106,7 @@ class AirportInputWindow(QWidget):
         self.input_layout.addLayout(row_layout)
 
         # Store the input row
-        self.data.append({"combo_box": combo_box, "input_line": input_line})
+        self.data.append({"combo_box": combo_box, "input_line": input_line, "description": description_label})
 
     def remove_input_row(self, row_layout, combo_box, input_line):
         # Remove all widgets in the given row layout
@@ -133,25 +133,31 @@ class AirportInputWindow(QWidget):
             os.mkdir("GUI_params")
 
         filepath = 'GUI_params/airport_sources'
-        with open(filepath, 'w') as f:
-            geoids = []
-            cases = []
-            for row in self.data:
-                combo_value = row["combo_box"].currentText()
-                input_value = row["input_line"].text()
+        geoids = []
+        cases = []
+        for row in self.data:
+            combo_value = row["combo_box"].currentText()
+            input_value = row["input_line"].text()
+            description = row["description"].text()
+            if description == 'Select an airport':
+                continue
 
-                if combo_value == 'Select an airport':
-                    continue
-
+            try:
                 case = int(input_value)
-                if case <= 0: continue
+                if case <= 0:
+                    self.show_invalid_input_error(combo_value)
+                    return
+            except:
+                self.show_invalid_input_error(combo_value)
+                return
 
-                geoids.append(AIRPORTS_INFO[combo_value][1])
-                cases.append(case)
+            geoids.append(AIRPORTS_INFO[combo_value][1])
+            cases.append(case)
 
-            # Ignore empty inputs
-            if len(geoids) == 0: return
+        # Ignore empty inputs
+        if len(geoids) == 0: return
 
+        with open(filepath, 'w') as f:
             f.write('list_init_cbg=')
             f.write('/'.join(geoids))
             f.write('\nnum_init_cases=')
@@ -160,6 +166,14 @@ class AirportInputWindow(QWidget):
 
         self.show_save_popup(filepath)
 
+    def show_invalid_input_error(self, airport):
+        error_popup = QMessageBox(self)
+        error_popup.setIcon(QMessageBox.Critical)  # Critical icon for errors
+        error_popup.setWindowTitle("Error")  # Title of the popup
+        error_popup.setText(f"Invalid input for airport {airport}")  # Error message text
+        error_popup.setInformativeText("Please input a positive integer")  # Additional information
+        error_popup.setStandardButtons(QMessageBox.Ok)  # OK button to close the popup
+        error_popup.exec_()  # Show the popup
 
     def show_save_popup(self, file_path):
         # Create a QMessageBox to display the saving path

@@ -2,39 +2,48 @@ import os
 import sys
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
                              QDesktopWidget, QPushButton, QLineEdit, QMessageBox,
-                             QComboBox,  QScrollArea, QLabel)
+                             QComboBox,  QScrollArea, QSpinBox, QLabel)
 from PyQt5.QtCore import Qt
 
 class R0InputWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.init_ui()
-        self.data = [] # List to store input data
 
-    def init_ui(self):
-        # Create the main vertical layout
-        self.main_layout = QVBoxLayout()
+        self.setWindowTitle("Create Input Boxes Based on Integer")
+        self.setGeometry(100, 100, 400, 300)
 
-        # A separate layout to hold the input rows
-        self.input_layout = QVBoxLayout()
-        self.main_layout.addLayout(self.input_layout)
+        # Main layout for the window
+        self.main_layout = QVBoxLayout(self)
 
-        # Create and add the button to the main layout
-        self.button = QPushButton("+")
-        self.button.clicked.connect(self.add_input_row)
-        self.main_layout.addWidget(self.button)
+        # Label to explain the input box
+        self.total_day_layout = QHBoxLayout()
+        self.instruction_label = QLabel("Days of the Infectious Lasting:")
+        self.total_day_layout.addWidget(self.instruction_label)
 
-        # Create and add the button to save inputs
+        # Input box to ask for the number of input fields
+        self.input_number_field = QSpinBox(self)  # Use QSpinBox for integer input
+        self.input_number_field.setRange(1, 100)  # Set min and max range
+        self.input_number_field.setValue(1)  # Set default value to 1
+        self.total_day_layout.addWidget(self.input_number_field)
+
+        # Button to trigger the creation of input boxes
+        self.create_button = QPushButton("✔️", self)
+        self.create_button.clicked.connect(self.create_input_boxes)
+        self.total_day_layout.addWidget(self.create_button)
+
+        self.main_layout.addLayout(self.total_day_layout)
+
+        # A layout to hold the dynamically created input boxes
+        self.dynamic_layout = QVBoxLayout()
+        self.main_layout.addLayout(self.dynamic_layout)
+
+        self.input_rows = []
+
         self.save_button = QPushButton("Save")
         self.save_button.clicked.connect(self.save_input_row)
         self.main_layout.addWidget(self.save_button)
 
-
-        # Set the layout for the main window
-        self.setLayout(self.main_layout)
-
         self.setWindowTitle("Disease R0")
-        self.setGeometry(200, 200, 500, 200)
         self.center()  # Call the method to center the widget
 
     def center(self):
@@ -52,67 +61,53 @@ class R0InputWindow(QWidget):
         # Move the top-left corner of the window to align with the new center
         self.move(window_geometry.topLeft())
 
+    def create_input_boxes(self):
+        # Clear any previously created input boxes
+        for row_layout in self.input_rows:
+            for widget in row_layout:
+                widget.deleteLater()  # Remove the widget from layout
+        self.input_rows.clear()  # Clear the reference list
 
-    def add_input_row(self):
-        day = len(self.data) + 1
 
-        # Create a horizontal layout for the new row
-        row_widget = QWidget(self)
-        row_layout = QHBoxLayout(row_widget)
+        # Get the number of input boxes to create
+        num_boxes = self.input_number_field.value()
 
-        # Description
-        description_label = QLabel(f"Day {day}", self)
+        # Create the specified number of input boxes
+        for i in range(num_boxes):
+            row_layout = QHBoxLayout()
+            label = QLabel(f"Day {i + 1}:", self)
+            input_field = QLineEdit(self)
+            row_layout.addWidget(label)
+            row_layout.addWidget(input_field)
 
-        # Input spread probability
-        input_line = QLineEdit()
-        input_line.setFixedWidth(200)
+            self.dynamic_layout.addLayout(row_layout)
 
-        # Create a "Remove Line" button
-        remove_button = QPushButton("-")
-        remove_button.setFixedWidth(50)
-        remove_button.clicked.connect(lambda: self.remove_input_row(row_widget,day))
-
-        # Add the label and input line to the horizontal layout
-        row_layout.addWidget(description_label)
-        row_layout.addWidget(input_line)
-        row_layout.addWidget(remove_button)
-
-        # Add the horizontal layout to the main vertical layout
-        self.input_layout.addWidget(row_widget)
-
-        # Store the input row
-        self.data.append((row_widget, description_label, input_line, remove_button))
-
-    def remove_input_row(self, row_widget, day):
-        # Remove the line widget from the layout
-        row_widget.deleteLater()
-
-        # Remove the line from the list
-        self.data = [line for line in self.data if line[0] != row_widget]
-
-        # Update the day of subsequent lines
-        for i, (widget, day_label, input_field, remove_button) in enumerate(self.data):
-            # Update the day number of subsequent lines
-            new_day = i + 1
-            day_label.setText(f"Day {new_day}")
+            self.input_rows.append([label, input_field])
 
     def save_input_row(self):
         if not os.path.exists("GUI_params"):
             os.mkdir("GUI_params")
 
         filepath = 'GUI_params/R0'
-        with open(filepath, 'w') as f:
-            probs = []
-            for row in self.data:
-                val = row[2].text()
-                if val == '' or float(val) < 0 or float(val) >= 1:
-                    self.show_invalid_input_error(row[1].text())
+
+        probs = []
+        for row in self.input_rows:
+            val = row[1].text()
+            try:
+                val = float(val)
+                if float(val) < 0 or float(val) >= 1:
+                    self.show_invalid_input_error(row[0].text()[:-1])
                     return
+                probs.append(val)
                 probs.append(str(float(val)))
+            except:
+                self.show_invalid_input_error(row[0].text()[:-1])
+                return
 
-            # Ignore empty inputs
-            if len(probs) == 0: return
+        # Ignore empty inputs
+        if len(probs) == 0: return
 
+        with open(filepath, 'w') as f:
             f.write('infection_chance_per_day=')
             f.write('/'.join(probs))
 
@@ -135,7 +130,6 @@ class R0InputWindow(QWidget):
         message_box.setText(f"Data has been saved to:\n{file_path}")
         message_box.setStandardButtons(QMessageBox.Ok)
         message_box.exec_()
-
 
 
 if __name__ == "__main__":
