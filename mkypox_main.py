@@ -56,7 +56,10 @@ try:
                 do_spread = line[1] == 'True'
             elif line[0] == 'from_airport':
                 from_airport = line[1] == 'True'
-            # TODO: map list of Airports to List of CBGs
+            elif line[0] == 'list_init_cbg':
+                list_init_cbg = line[1].split('/')
+                list_init_cbg = [np.int64(int(cbg)) for cbg in list_init_cbg]
+
 except:  # No custom parameters provided
     pass
 
