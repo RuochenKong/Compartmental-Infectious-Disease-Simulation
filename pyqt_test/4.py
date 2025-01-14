@@ -1,40 +1,71 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton
 
-class RemoveWidgetDemo(QMainWindow):
+
+class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Remove Widget Example")
-        self.setGeometry(100, 100, 400, 200)
 
-        self.initUI()
+        self.setWindowTitle("Dynamic Input Lines")
+        self.setGeometry(100, 100, 400, 300)
 
-    def initUI(self):
-        # Central widget and layout
-        self.central_widget = QWidget()
-        self.layout = QVBoxLayout()
+        # Main layout for the window
+        self.main_layout = QVBoxLayout(self)
 
-        # Input widget to be removed
-        self.input_widget = QLineEdit(self)
-        self.input_widget.setPlaceholderText("Type something here...")
-        self.layout.addWidget(self.input_widget)
+        # List to keep track of the input fields and remove buttons
+        self.input_lines = []
 
-        # Button to remove the input widget
-        self.remove_button = QPushButton("Remove Input Widget", self)
-        self.remove_button.clicked.connect(self.remove_input_widget)
-        self.layout.addWidget(self.remove_button)
+        # Button to add new input line
+        self.add_button = QPushButton("Add Input Line", self)
+        self.add_button.clicked.connect(self.add_input_line)
 
-        self.central_widget.setLayout(self.layout)
-        self.setCentralWidget(self.central_widget)
+        # Add the add button to the main layout
+        self.main_layout.addWidget(self.add_button)
 
-    def remove_input_widget(self):
-        if self.input_widget:  # Check if the widget exists
-            self.layout.removeWidget(self.input_widget)  # Remove widget from layout
-            self.input_widget.deleteLater()  # Schedule widget for deletion
-            self.input_widget = None  # Set to None to avoid repeated deletion
+    def add_input_line(self):
+        # Create a new input line with day and widgets
+        day = len(self.input_lines) + 1  # Day starts at 1 and increments with each line
+
+        line_widget = QWidget(self)
+        line_layout = QHBoxLayout(line_widget)
+
+        # Day label
+        day_label = QLabel(f"Day {day}", self)
+
+        # Input field
+        input_field = QLineEdit(self)
+
+        # Remove button
+        remove_button = QPushButton("Remove", self)
+        remove_button.clicked.connect(lambda: self.remove_input_line(line_widget, day))
+
+        # Add widgets to line layout
+        line_layout.addWidget(day_label)
+        line_layout.addWidget(input_field)
+        line_layout.addWidget(remove_button)
+
+        # Add the line to the main layout
+        self.main_layout.addWidget(line_widget)
+
+        # Track the line and its components
+        self.input_lines.append((line_widget, day_label, input_field, remove_button))
+
+    def remove_input_line(self, line_widget, day):
+        # Remove the line widget from the layout
+        line_widget.deleteLater()
+
+        # Remove the line from the list
+        self.input_lines = [line for line in self.input_lines if line[0] != line_widget]
+
+        # Update the day of subsequent lines
+        for i, (widget, day_label, input_field, remove_button) in enumerate(self.input_lines):
+            # Update the day number of subsequent lines
+            new_day = i + 1
+            day_label.setText(f"Day {new_day}")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    demo = RemoveWidgetDemo()
-    demo.show()
+    window = MainWindow()
+    window.show()
     sys.exit(app.exec_())

@@ -13,7 +13,7 @@ for k,name,geoid in zip(tmp_df['iata_code'], tmp_df['name'],tmp_df['GeoId']):
 AIRPORTS = list(AIRPORTS_INFO.keys())
 AIRPORTS.sort()
 
-class DynamicInputApp(QWidget):
+class AirportInputWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -40,7 +40,7 @@ class DynamicInputApp(QWidget):
         # Set the layout for the main window
         self.setLayout(self.main_layout)
 
-        self.setWindowTitle("Dynamic Input Rows")
+        self.setWindowTitle("Disease Input Airports")
         self.setGeometry(200, 200, 900, 200)
         self.center()  # Call the method to center the widget
 
@@ -174,6 +174,6 @@ class DynamicInputApp(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = DynamicInputApp()
+    window = AirportInputWindow()
     window.show()
     sys.exit(app.exec_())
