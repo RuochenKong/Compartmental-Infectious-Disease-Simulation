@@ -4,6 +4,6 @@ days_of_simulation=90
 total_runs=4
 num_threads=4
 num_init_cases=10/10
-output_dir=sample_output
+output_dir=test
 from_airport=True
 do_spread=True
