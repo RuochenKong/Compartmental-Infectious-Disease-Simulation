@@ -9,7 +9,6 @@ class R0InputWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Create Input Boxes Based on Integer")
         self.setGeometry(100, 100, 400, 300)
 
         # Main layout for the window
@@ -75,7 +74,10 @@ class R0InputWindow(QWidget):
         # Create the specified number of input boxes
         for i in range(num_boxes):
             row_layout = QHBoxLayout()
-            label = QLabel(f"Day {i + 1}:", self)
+            label = QLabel(f"Day {i + 1}", self)
+            label.setFixedWidth(100)
+            label.setAlignment(Qt.AlignRight)
+
             input_field = QLineEdit(self)
             row_layout.addWidget(label)
             row_layout.addWidget(input_field)
@@ -85,8 +87,6 @@ class R0InputWindow(QWidget):
             self.input_rows.append([label, input_field])
 
     def save_input_row(self):
-        if not os.path.exists("GUI_params"):
-            os.mkdir("GUI_params")
 
         filepath = 'GUI_params/R0'
 
@@ -96,9 +96,8 @@ class R0InputWindow(QWidget):
             try:
                 val = float(val)
                 if float(val) < 0 or float(val) >= 1:
-                    self.show_invalid_input_error(row[0].text()[:-1])
+                    self.show_invalid_input_error(row[0].text())
                     return
-                probs.append(val)
                 probs.append(str(float(val)))
             except:
                 self.show_invalid_input_error(row[0].text()[:-1])

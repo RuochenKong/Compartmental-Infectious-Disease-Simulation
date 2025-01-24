@@ -1,3 +1,4 @@
+import os
 import sys
 import subprocess
 from json.encoder import INFINITY
@@ -10,6 +11,7 @@ from PyQt5.QtCore import Qt
 
 from r0_input_window import R0InputWindow
 from airports_input_window import AirportInputWindow
+from random_src_input_window import RandomSrcInputWindow
 
 
 DES2PARAM = {'Random Seed': 'seed',
@@ -28,6 +30,10 @@ class InputPlatform(QWidget):
     def init_ui(self):
         self.setWindowTitle("Simulation Set Up")
 
+        self.r0_window = R0InputWindow()
+        self.airport_source_window = AirportInputWindow()
+        self.ramdom_source_window = RandomSrcInputWindow()
+
         # Create layout
         self.layout = QVBoxLayout()
 
@@ -35,10 +41,11 @@ class InputPlatform(QWidget):
         self.input_line = []
 
         self.add_integer_input('Random Seed')
-        self.add_integer_input('Days to simulate')
-        self.add_integer_input('Number of total runs')
-        self.add_integer_input('Number of threads')
+        self.add_integer_input('Days to simulate',1)
+        self.add_integer_input('Number of total runs',1)
+        self.add_integer_input('Number of threads',1)
         self.add_r0_input()
+        self.add_infectious_source_input()
 
         self.add_check_box('Save spreading history')
         self.add_check_box('Save logging information')
@@ -92,6 +99,7 @@ class InputPlatform(QWidget):
         row_layout.addWidget(push_button)
 
         self.layout.addLayout(row_layout)
+        self.input_line.append({'description': description, 'input': push_button})
 
     def add_infectious_source_input(self):
         row_layout = QHBoxLayout()
@@ -101,16 +109,36 @@ class InputPlatform(QWidget):
         description.setAlignment(Qt.AlignRight)
 
         combo_box = QComboBox(self)
-        combo_box.addItems(["Random", "Airports"])
+        combo_box.addItems(["Select an option", "Random", "Airports"])
+        combo_box.setFixedWidth(150)
 
+        combo_box.currentIndexChanged.connect(self.handle_selection)
+
+        row_layout.addWidget(description)
+        row_layout.addWidget(combo_box)
+        self.layout.addLayout(row_layout)
+
+        self.input_line.append({'description': description, 'input': combo_box})
+
+    def handle_selection(self, index):
+        try:
+            self.r0_window.close()
+        except:  pass
+
+        # Handle combo box selection
+        if index == 1: # Option 1 selected
+            try:
+                self.airport_source_window.close()
+            except: pass
+            self.ramdom_source_window.show()
+        elif index == 2:  # Option 2 selected
+            try:
+                self.ramdom_source_window.close()
+            except: pass
+            self.airport_source_window.show()
 
     def open_r0_window(self):
-        self.r0_window = R0InputWindow()
         self.r0_window.show()
-
-    def open_airport_source_window(self):
-        self.airport_source_window = AirportInputWindow()
-        self.airport_source_window.show()
 
     def add_integer_input(self, label, minV=None):
         row_layout = QHBoxLayout()
@@ -148,6 +176,9 @@ class InputPlatform(QWidget):
 
         self.layout.addLayout(row_layout)
 
+        # Store data
+        self.input_line.append({'description': description, 'input': checkbox})
+
     def add_output_dir_input(self):
         row_layout = QHBoxLayout()
 
@@ -163,38 +194,103 @@ class InputPlatform(QWidget):
 
         self.layout.addLayout(row_layout)
 
+        # Store data
+        self.input_line.append({'description': description, 'input': input_line})
+
     def run_simulation(self):
         # subprocess.Popen(["python", "mkypox_main.py"])
         print('Not yet implemented')
 
     def save_to_file(self):
-        # Get values from input fields
-        data = {label: input_field.text() for label, input_field in self.inputs.items() if input_field.text().strip()}
 
-        # Add checkbox value only if checked
-        if self.checkbox.isChecked():
-            data["do_log"] = "True"
+        filepath = 'GUI_params/params'
 
-        if not data:
-            QMessageBox.warning(self, "Warning", "No data to save. All fields are empty.")
-            return
+        output_lines = []
+        r0_file = ''
+        src_file = ''
 
-        # Define fixed file path
-        file_name = "params"
+        for row in self.input_line:
+            description = row['description'].text()
+            label = None
+            if description in DES2PARAM:
+                label = DES2PARAM[description]
 
-        try:
-            # Save data to file
-            with open(file_name, "w") as file:
-                for key, value in data.items():
-                    file.write(f"{key}={value}\n")
+            input_value = row['input']
+            if isinstance(input_value, QSpinBox):
+                input_value = str(input_value.value())
+            elif isinstance(input_value, QCheckBox):
+                input_value = 'True' if input_value.isChecked() else 'False'
+            elif isinstance(input_value, QLineEdit):
+                input_value = input_value.text().strip()
+                if input_value == '':
+                    input_value = 'output'
+            elif isinstance(input_value, QPushButton):  # This is R0 input
+                if not os.path.exists('GUI_params/R0'):
+                    self.show_invalid_input_error('Missing parameters', 'No input for spread chance')
+                    return
+                with open('GUI_params/R0') as f:
+                    r0_file = f.read().strip()
+            elif isinstance(input_value, QComboBox):  # This is source places
+                if input_value.currentText() == 'Select an option':
+                    self.show_invalid_input_error('Missing parameters', 'No input for disease sources')
+                    return
+                if input_value.currentText() == 'Random':
+                    if not os.path.exists('GUI_params/random_source'):
+                        self.show_invalid_input_error('Missing parameters', 'No input for disease sources')
+                        return
+                    with open('GUI_params/random_source') as f:
+                        src_file = f.read().strip()
+                else:
+                    if not os.path.exists('GUI_params/airport_sources'):
+                        self.show_invalid_input_error('Missing parameters', 'No input for disease sources')
+                        return
+                    with open('GUI_params/airport_sources') as f:
+                        src_file = f.read().strip()
 
-            # Confirmation message
-            QMessageBox.information(self, "Success", f"Parameters saved to {file_name}!")
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to save the parameters: {e}")
+            if label is not None:
+                output_lines.append(label +'='+input_value)
+
+        with open(filepath, 'w') as f:
+            f.write('\n'.join(output_lines))
+            f.write('\n' + r0_file)
+            f.write('\n' + src_file)
+
+        self.show_save_popup(filepath)
+
+
+
+    def show_invalid_input_error(self, main_text, informative_text):
+        error_popup = QMessageBox(self)
+        error_popup.setIcon(QMessageBox.Critical)  # Critical icon for errors
+        error_popup.setWindowTitle("Error")  # Title of the popup
+        error_popup.setText(main_text)  # Error message text
+        error_popup.setInformativeText(informative_text)  # Additional information
+        error_popup.setStandardButtons(QMessageBox.Ok)  # OK button to close the popup
+        error_popup.exec_()  # Show the popup
+
+    def show_save_popup(self, file_path):
+        # Create a QMessageBox to display the saving path
+        message_box = QMessageBox()
+        message_box.setFixedWidth(300)
+        message_box.setWindowTitle("Save Successful")
+        message_box.setText(f"Data has been saved to:\n{file_path}")
+        message_box.setStandardButtons(QMessageBox.Ok)
+        message_box.exec_()
 
 if __name__ == "__main__":
+    if not os.path.exists("GUI_params"):
+        os.mkdir("GUI_params")
+
+    for filename in os.listdir("GUI_params"):
+        os.remove('GUI_params/%s'%filename)
+
     app = QApplication(sys.argv)
+    app.setStyleSheet("""
+        * {
+            font-family: "Calibri";
+            font-size: 12pt;
+        }
+    """)
     window = InputPlatform()
     window.show()
     sys.exit(app.exec_())

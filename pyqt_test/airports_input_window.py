@@ -2,7 +2,7 @@ import os
 import sys
 import pandas as pd
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
-                             QDesktopWidget, QPushButton, QLineEdit, QMessageBox,
+                             QDesktopWidget, QPushButton, QSpinBox, QMessageBox,
                              QComboBox,  QScrollArea, QLabel)
 from PyQt5.QtCore import Qt
 
@@ -41,7 +41,7 @@ class AirportInputWindow(QWidget):
         self.setLayout(self.main_layout)
 
         self.setWindowTitle("Disease Input Airports")
-        self.setGeometry(200, 200, 900, 200)
+        self.setGeometry(200, 200, 600, 200)
         self.center()  # Call the method to center the widget
 
     def center(self):
@@ -83,7 +83,9 @@ class AirportInputWindow(QWidget):
         combo_box = QComboBox(self)
         combo_box.addItems(AIRPORTS)
         combo_box.setFixedWidth(150)
-        input_line = QLineEdit()
+
+        input_line = QSpinBox(self)
+        input_line.setMinimum(1)
         input_line.setFixedWidth(100)
 
         # update description
@@ -129,30 +131,18 @@ class AirportInputWindow(QWidget):
         description_label.setStyleSheet("color: black;")  # Set text color to red
 
     def save_input_row(self):
-        if not os.path.exists("GUI_params"):
-            os.mkdir("GUI_params")
-
         filepath = 'GUI_params/airport_sources'
         geoids = []
         cases = []
         for row in self.data:
             combo_value = row["combo_box"].currentText()
-            input_value = row["input_line"].text()
+            input_value = row["input_line"].value()
             description = row["description"].text()
             if description == 'Select an airport':
                 continue
 
-            try:
-                case = int(input_value)
-                if case <= 0:
-                    self.show_invalid_input_error(combo_value)
-                    return
-            except:
-                self.show_invalid_input_error(combo_value)
-                return
-
             geoids.append(AIRPORTS_INFO[combo_value][1])
-            cases.append(case)
+            cases.append(input_value)
 
         # Ignore empty inputs
         if len(geoids) == 0: return
