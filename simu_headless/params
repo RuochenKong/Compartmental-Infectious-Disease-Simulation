@@ -1,0 +1,9 @@
+seed=0
+infection_chance_per_day=0.2/0.3/0.3/0.2/0.1/0.1
+days_of_simulation=90
+total_runs=200
+num_threads=4
+output_dir=fairfax
+do_spread=True
+num_init_cases=3/3
+is_fairfax=True
