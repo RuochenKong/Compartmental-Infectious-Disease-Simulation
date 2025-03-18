@@ -4,3 +4,4 @@ src_data
 *.zip
 *.csv
 *.log
+raw_census_data
