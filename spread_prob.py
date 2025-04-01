@@ -1,5 +1,8 @@
 import pandas as pd
+import os
 
+if not os.path.exists('spread_probability'):
+    os.mkdir('spread_probability')
 
 chunked_data = pd.read_csv('src_data/cbg2cbg_revise.csv', chunksize=100000)
 chunk_list = []
@@ -27,6 +30,14 @@ def cal_spread_probs(src_cbg_df):
     probs = probs[['from', 'to', 'prob']]
     return probs
 
-results = group_by_src[transport_data.columns.tolist()].apply(cal_spread_probs).reset_index(drop=True)
+src_cbgs = transport_data['poi_cbg_source'].unique().tolist()
+output_data = []
+for i,src_cbg in enumerate(src_cbgs):
+    if (i+1) %1000 == 0:
+        df = pd.concat(output_data)
+        df.to_csv('spread_probability/{}.csv'.format( (i+1) // 1000), index=False)
+        output_data = []
 
-results.to_csv('src_data/spread_probability.csv', index=False)
+    output_data.append(cal_spread_probs(group_by_src.get_group(src_cbg)))
+df = pd.concat(output_data)
+df.to_csv('spread_probability/{}.csv'.format( len(src_cbgs) // 1000+1), index=False)
