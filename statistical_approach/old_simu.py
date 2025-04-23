@@ -8,6 +8,7 @@ import sys
 
 random.seed(42)
 np.random.seed(42)
+tot_case = [0]
 
 # HELPER FUNCTIONS
 # Get a CBG where the infected case will visit
@@ -170,6 +171,7 @@ def nextDay(counter, active_cases, current_day):
                 index += 1
                 # collect new case
                 new_active_cases.append([rev_src_cbg, 0])
+                tot_case[0] += 1
                 # if do_log: f_log.write('Day#%d %s infected %s\n' % (current_day, active_cases[i], rev_src_cbg))
         else:
             # if do_log: f_log.write('Day#%d %s causes nothing\n' % (current_day, active_cases[i]))
@@ -198,5 +200,6 @@ for i in range(2, days_of_simulation+2):
     nextDay(simu_counter, active_cases, i)
 end_time = time.time()
 
-print(f"Running time: {end_time-start_time:.4f} seconds for {days_of_simulation} days of simulation")
+print(f"Running time: {end_time-start_time:.4f} seconds for {days_of_simulation} days of simulation,"
+      f" with {tot_case[0]} total cases")
 # simu_counter.iloc[N:].to_csv(fn_simu, index=False)

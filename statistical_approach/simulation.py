@@ -197,4 +197,8 @@ start_time = time.time()
 for day in range(180):
     next_day(day+1)
 end_time = time.time()
-print(f"Running time: {end_time-start_time:.4f} seconds for {days_of_simulation} days of simulation")
+tot_case = 0
+for cbg in total_case_tracker.keys():
+    tot_case += total_case_tracker[cbg][1]
+print(f"Running time: {end_time-start_time:.4f} seconds for {days_of_simulation} days of simulation,"
+      f" with {tot_case} total cases")
