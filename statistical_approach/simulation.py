@@ -2,15 +2,17 @@ import numpy as np
 import pandas as pd
 import random
 import time
+import sys
 
-random.seed(42)
-np.random.seed(42)
+seed = int(sys.argv[2])
+random.seed(seed)
+np.random.seed(seed)
 
 num_init_cases = 100
 infectious_rate = [0.1,0.2,0.3,0.3,0.2,0.1,0.1]
 infectious_day = len(infectious_rate)
 
-spread_prob_df = pd.concat([pd.read_csv('../spread_probability_top30/%d.csv'%i) for i in range(1,5)],ignore_index=True)
+spread_prob_df = pd.concat([pd.read_csv('../spread_probability_top30/%d.csv'%i) for i in range(1,6)],ignore_index=True)
 spread_prob_df['from'] = spread_prob_df['from'].apply(lambda x: '%012d'%x)
 spread_prob_df['to'] = spread_prob_df['to'].apply(lambda x: '%012d'%x)
 spread_prob_df = spread_prob_df[['from', 'to', 'prob']].reset_index(drop = True)
@@ -105,7 +107,8 @@ def next_day(simulation_day):
                         if random.random() < infectious_rate[d]:
                             des_cbg = get_random_des(des_prob_df)
                             reduce_prob = total_case_tracker[des_cbg][1]/total_case_tracker[des_cbg][0]
-                            if counter[des_cbg][0] == 0 or random.random() < reduce_prob: continue # Assume spread to an already infected person
+                            # if counter[des_cbg][0] == 0 or random.random() < reduce_prob: continue # Assume spread to an already infected person
+                            if counter[des_cbg][0] == 0: continue # Assume spread to an already infected person
                             if des_cbg not in new_cases: new_cases[des_cbg] = 0
                             new_cases[des_cbg] += 1
                             total_case_tracker[des_cbg][1] += 1
@@ -122,7 +125,10 @@ def next_day(simulation_day):
                     for _ in range(actual_new_case):
                         des_cbg = get_random_des(des_prob_df)
                         reduce_prob = total_case_tracker[des_cbg][1]/total_case_tracker[des_cbg][0]
-                        if counter[des_cbg][0] == 0 or random.random() < reduce_prob: # Assume spread to an already infected person
+                        # if counter[des_cbg][0] == 0 or random.random() < reduce_prob: # Assume spread to an already infected person
+                        #     failed_spread += 1
+                        #     continue
+                        if counter[des_cbg][0] == 0: # Assume spread to an already infected person
                             failed_spread += 1
                             continue
                         if des_cbg not in new_case_by_day:
@@ -132,6 +138,7 @@ def next_day(simulation_day):
                         counter[des_cbg][0] -= 1
                         counter[des_cbg][1] += 1
                     actual_new_case -= failed_spread
+                    if actual_new_case > num_infectious: print('Approach 2 overflow')
 
             else: # calculate the expected number of new cases, then use normal/Poisson distribution for destinations
                 for des_idx in des_prob_df.index:
@@ -140,8 +147,9 @@ def next_day(simulation_day):
                     if des_susceptible == 0: continue # No susceptible population
 
                     des_prob = des_prob_df.loc[des_idx,'prob']
-                    reduce_prob = total_case_tracker[des_cbg][1]/total_case_tracker[des_cbg][0]
-                    expected_new_case_in_des = expected_new_case * des_prob * (1-reduce_prob)
+                    # reduce_prob = total_case_tracker[des_cbg][1]/total_case_tracker[des_cbg][0]
+                    # expected_new_case_in_des = expected_new_case * des_prob * (1-reduce_prob)
+                    expected_new_case_in_des = expected_new_case * des_prob
 
                     if expected_new_case_in_des < 5: # Poisson distribution
                         actual_new_case_in_des = np.random.poisson(expected_new_case_in_des)
@@ -158,9 +166,11 @@ def next_day(simulation_day):
                     total_case_tracker[des_cbg][1] += actual_new_case_in_des
                     counter[des_cbg][0] -= actual_new_case_in_des
                     counter[des_cbg][1] += actual_new_case_in_des
+                if actual_new_case > num_infectious: print('Approach 3 overflow')
 
             sidx = 0
-            src_case_idx = np.random.choice(num_infectious, size = actual_new_case, replace = False) + current_case_idx if actual_new_case else None
+            if actual_new_case > num_infectious: print(num_infectious, actual_new_case)
+            src_case_idx = np.random.choice(num_infectious, size = actual_new_case) + current_case_idx if actual_new_case else None
             for des_cbg, des_case in new_case_by_day.items(): # Update new case counter
                 if des_cbg not in new_cases: new_cases[des_cbg] = 0
                 new_cases[des_cbg] += des_case
@@ -192,13 +202,15 @@ def next_day(simulation_day):
 
     return region_level_output_str, case_level_output_str
 
-days_of_simulation = 180
+days_of_simulation = sys.argv[1]
 start_time = time.time()
 for day in range(180):
     next_day(day+1)
 end_time = time.time()
 tot_case = 0
+tot_cbg = 0
 for cbg in total_case_tracker.keys():
     tot_case += total_case_tracker[cbg][1]
+    if total_case_tracker[cbg][1] != 0: tot_cbg += 1
 print(f"Running time: {end_time-start_time:.4f} seconds for {days_of_simulation} days of simulation,"
-      f" with {tot_case} total cases")
+      f" with {tot_case} total cases among {tot_cbg} CBGs")

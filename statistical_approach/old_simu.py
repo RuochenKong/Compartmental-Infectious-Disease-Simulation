@@ -6,8 +6,9 @@ import numpy as np
 import random
 import sys
 
-random.seed(42)
-np.random.seed(42)
+seed = int(sys.argv[2])
+random.seed(seed)
+np.random.seed(seed)
 tot_case = [0]
 
 # HELPER FUNCTIONS
@@ -48,7 +49,7 @@ def get_random_src(des_df):
 # SIMULATION SETUP
 # User deciding parameters
 infection_chance_per_day = [0.1,0.2,0.3,0.3,0.2,0.1,0.1]
-days_of_simulation = 180
+days_of_simulation = int(sys.argv[1])
 
 num_init_cases = [100,100,100,100,100]
 list_init_cbg = [250092524002, 361190111013, 270530257013, 360650228002, 261635154001]
@@ -98,13 +99,13 @@ list_init_cbg = [250092524002, 361190111013, 270530257013, 360650228002, 2616351
 
 # Loading source data
 # -- TODO Low priority: loading only once for all simulation runs
-chunked_data = pd.read_csv('src_data/cbg2cbg_revise.csv', chunksize=10000)
+chunked_data = pd.read_csv('../src_data/cbg2cbg_revise.csv', chunksize=10000)
 chunk_list = []
 for chunk in chunked_data:
     chunk_list.append(chunk)
 transport_data = pd.concat(chunk_list)
 
-pop_data = pd.read_csv('src_data/usa_population_revise.csv', dtype=np.int64)
+pop_data = pd.read_csv('../src_data/usa_population_revise.csv', dtype=np.int64)
 N = len(pop_data)
 src_cbg_names = list(transport_data['poi_cbg_source'].unique())
 n_src_CBG = len(src_cbg_names)
@@ -112,15 +113,15 @@ n_src_CBG = len(src_cbg_names)
 group_by_src = transport_data.groupby('poi_cbg_source')
 group_by_des = transport_data.groupby('poi_cbg_destination')
 
-
+infected_cbg = set()
 # Initiate a counter
 def initCounter():
-    counter = pd.DataFrame(dtype=np.int64)
-    counter['day'] = [0] * N
-    counter['cbg'] = pop_data['GeoId'].copy()
-    counter['susceptible'] = pop_data['Population'].copy()
-    counter['infectious'] = [0] * N
-    counter['recovered'] = [0] * N
+    counter = {}
+    N = len(pop_data)
+    for i in range(N):
+        cbg = pop_data.loc[i,'GeoId']
+        pop = int(pop_data.loc[i,'Population'])
+        counter[cbg] = [pop, 0, 0] # S, I, R
     return counter
 
 
@@ -131,14 +132,13 @@ def initCase(counter, new_case_nums, new_case_CBGs):
         for i in range(len(new_case_nums)):
             new_case_CBGs.append(src_cbg_names[random.randint(0, n_src_CBG - 1)])
 
-    index = len(counter)
     active_cases = []  # list of [cbg, num_day]
     for case_num, case_cbg in zip(new_case_nums, new_case_CBGs):
-        sus_num = counter[counter['cbg'] == case_cbg].iloc[-1]['susceptible']
+        sus_num = counter[case_cbg][0]
         case_num = min(sus_num, case_num)
 
-        counter.loc[index] = [1, case_cbg, sus_num - case_num, case_num, 0]
-        index += 1
+        counter[case_cbg][0] -= case_num
+        counter[case_cbg][1] -= case_num
 
         for _ in range(case_num):
             active_cases.append([case_cbg, 0])
@@ -153,25 +153,27 @@ def nextDay(counter, active_cases, current_day):
 
     new_active_cases = []
     i = 0
-    index = len(counter)
+
+    counter[current_day] = {}
     while i < len(active_cases):
         src_cbg, num_day = active_cases[i]
         if random.random() < infection_chance_per_day[num_day]:
             des_cbg = get_random_des(group_by_src.get_group(src_cbg))
             rev_src_cbg = get_random_src(group_by_des.get_group(des_cbg))
 
-            rev_src_cbg_count = counter[counter['cbg'] == rev_src_cbg].iloc[-1]
-            if rev_src_cbg_count['susceptible'] == 0:
+            rev_src_cbg_count = counter[rev_src_cbg]
+            if rev_src_cbg_count[0] == 0:
                 # if do_log: f_log.write(
                 #     'Day#%d %s try to infect %s, but full\n' % (current_day, active_cases[i], rev_src_cbg))
                 pass
             else:  # activate a new case
-                counter.loc[index] = [current_day, rev_src_cbg, rev_src_cbg_count['susceptible'] - 1,
-                                      rev_src_cbg_count['infectious'] + 1, rev_src_cbg_count['recovered']]
-                index += 1
+                counter[rev_src_cbg][0] -= 1
+                counter[rev_src_cbg][1] += 1
+
                 # collect new case
                 new_active_cases.append([rev_src_cbg, 0])
                 tot_case[0] += 1
+                infected_cbg.add(rev_src_cbg)
                 # if do_log: f_log.write('Day#%d %s infected %s\n' % (current_day, active_cases[i], rev_src_cbg))
         else:
             # if do_log: f_log.write('Day#%d %s causes nothing\n' % (current_day, active_cases[i]))
@@ -181,10 +183,8 @@ def nextDay(counter, active_cases, current_day):
         if active_cases[i][1] == len(infection_chance_per_day):
             active_cases.pop(i)
             # one case recover
-            src_cbg_count = counter[counter['cbg'] == src_cbg].iloc[-1]
-            counter.loc[index] = [current_day, src_cbg, src_cbg_count['susceptible'], src_cbg_count['infectious'] - 1,
-                                  src_cbg_count['recovered'] + 1]
-            index += 1
+            counter[src_cbg][1] -= 1
+            counter[src_cbg][2] += 1
         else:
             i += 1
 
@@ -201,5 +201,5 @@ for i in range(2, days_of_simulation+2):
 end_time = time.time()
 
 print(f"Running time: {end_time-start_time:.4f} seconds for {days_of_simulation} days of simulation,"
-      f" with {tot_case[0]} total cases")
+      f" with {tot_case[0]} total cases among {len(infected_cbg)} CBGs")
 # simu_counter.iloc[N:].to_csv(fn_simu, index=False)
