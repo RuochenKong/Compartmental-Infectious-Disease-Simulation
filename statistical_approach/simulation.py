@@ -121,6 +121,7 @@ def next_day(simulation_day):
                 else: # normal distribution on number of new cases, then naive approach for destinations
                     actual_new_case = np.random.normal(expected_new_case, expected_new_case * (1-infectious_rate[d]))
                     actual_new_case = max(0,int(actual_new_case))
+                    actual_new_case = min(actual_new_case, num_infectious)
                     failed_spread = 0
                     for _ in range(actual_new_case):
                         des_cbg = get_random_des(des_prob_df)
