@@ -139,7 +139,7 @@ def next_day(simulation_day):
                         counter[des_cbg][0] -= 1
                         counter[des_cbg][1] += 1
                     actual_new_case -= failed_spread
-                    if actual_new_case > num_infectious: print('Approach 2 overflow')
+                    print('Approach 2')
 
             else: # calculate the expected number of new cases, then use normal/Poisson distribution for destinations
                 for des_idx in des_prob_df.index:
@@ -167,7 +167,7 @@ def next_day(simulation_day):
                     total_case_tracker[des_cbg][1] += actual_new_case_in_des
                     counter[des_cbg][0] -= actual_new_case_in_des
                     counter[des_cbg][1] += actual_new_case_in_des
-                if actual_new_case > num_infectious: print('Approach 3 overflow')
+                print('Approach 3')
 
             sidx = 0
             if actual_new_case > num_infectious: print(num_infectious, actual_new_case)
