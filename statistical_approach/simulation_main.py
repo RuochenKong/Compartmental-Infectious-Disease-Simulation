@@ -6,7 +6,7 @@ import random
 import pandas as pd
 import numpy as np
 from threading import Thread, active_count
-import mkypox_util
+import simulation_util
 
 # SIMULATION SETUP
 # User deciding parameters
@@ -24,6 +24,10 @@ do_case = False
 simu_id = 0
 
 from_des = False
+
+available_region_level = ['county', 'census_tract', 'cbg']
+region_level = 'cbg'
+invalid_region_level = False
 
 # Reset parameters with Input file
 try:
@@ -59,17 +63,18 @@ try:
                 from_des = line[1] == 'True'
             elif line[0] == 'list_init_cbg':
                 list_init_cbg = line[1].split('/')
-                list_init_cbg = [np.int64(int(cbg)) for cbg in list_init_cbg]
-
+            elif line[0] == 'simu_id':
+                simu_id = int(line[1])
+            elif line[0] == 'region_level':
+                rl = line[1].lower()
+                if rl not in available_region_level:
+                    print('Invalid region level. Available region level: %s'%str(available_region_level))
+                    invalid_region_level = True
+                region_level = rl
 except:  # No custom parameters provided
     pass
 
-# Reset simulation id from the command line
-try:
-    idx = sys.argv.index('-id')
-    simu_id = int(sys.argv[idx + 1])
-except:  # No id specified
-    pass
+if invalid_region_level: exit(1)
 
 fn_region = output_dir + 'simu_%d_region_level.csv' if do_region else None
 fn_case = output_dir + 'simu_%d_case_level.csv' if do_case else None
@@ -82,3 +87,12 @@ spread_prob_df = spread_prob_df[['from', 'to', 'prob']].reset_index(drop = True)
 spread_prob_grouped_df = spread_prob_df.groupby('from')
 pop_data = pd.read_csv('../src_data/usa_population_revise.csv', dtype ={'GeoId':str, 'Population':np.int64})
 
+
+simu_args = [days_of_simulation, list_init_cbg, num_init_cases, infection_chance_per_day, from_des, pop_data,  spread_prob_grouped_df, fn_region, fn_case]
+k = 0
+while total_runs > 0:
+    while active_count() > num_threads:
+        time.sleep(1)
+    Thread(target=simulation_util.main, args=simu_args + [simu_id + k, seed + simu_id + k]).start()
+    k += 1
+    total_runs -= 1

@@ -1,0 +1,11 @@
+seed=0
+infection_chance_per_day=0.2/0.3/0.3/0.2/0.2/0.1
+days_of_simulation=240
+total_runs=4
+num_threads=4
+output_dir=test
+do_region=True
+do_case=True
+list_init_cbg=250092524002/361190111013/270530257013/360650228002/261635154001
+num_init_cases=10/10/10/10/10
+region_level=cbg
