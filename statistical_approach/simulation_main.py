@@ -17,13 +17,14 @@ total_runs = 1
 num_threads = 4
 
 num_init_cases = 100
-list_init_cbg = None
+init_region_id = None
 output_dir = 'output_data/'
 do_region = False
 do_case = False
 simu_id = 0
 
 from_des = False
+from_random_airports = False
 
 available_region_level = ['county', 'census_tract', 'cbg']
 region_level = 'cbg'
@@ -61,8 +62,8 @@ try:
                 do_case = line[1] == 'True'
             elif line[0] == 'from_des':
                 from_des = line[1] == 'True'
-            elif line[0] == 'list_init_cbg':
-                list_init_cbg = line[1].split('/')
+            elif line[0] == 'init_region_id':
+                init_region_id = line[1].split('/')
             elif line[0] == 'simu_id':
                 simu_id = int(line[1])
             elif line[0] == 'region_level':
@@ -70,25 +71,44 @@ try:
                 if rl not in available_region_level:
                     print('Invalid region level. Available region level: %s'%str(available_region_level))
                     invalid_region_level = True
-                region_level = rl
+                region_level = rl.lower()
+            elif line[0] == 'from_random_airports':
+                from_random_airports = line[1] == 'True'
 except:  # No custom parameters provided
     pass
 
 if invalid_region_level: exit(1)
+if from_random_airports: from_des = False
+if type(num_init_cases) == int:
+    num_init_cases = [num_init_cases] if init_region_id is None else [num_init_cases for _ in range(len(init_region_id))]
+if init_region_id is not None and len(num_init_cases) != len(init_region_id):
+    print('len(init_region_id) != len(num_init_cases)')
+    exit(1)
+
+if init_region_id is None:
+    airport_df = pd.read_csv('../airport_data_process/airports_GeoId.csv',dtype=str)
+
 
 fn_region = output_dir + 'simu_%d_region_level.csv' if do_region else None
 fn_case = output_dir + 'simu_%d_case_level.csv' if do_case else None
 
-# TODO: Multi-level spread probability (County, Censes Track, CBG)
-spread_prob_df = pd.concat([pd.read_csv('../spread_probability_top30/%d.csv'%i) for i in range(1,6)],ignore_index=True)
-spread_prob_df['from'] = spread_prob_df['from'].apply(lambda x: '%012d'%x)
-spread_prob_df['to'] = spread_prob_df['to'].apply(lambda x: '%012d'%x)
-spread_prob_df = spread_prob_df[['from', 'to', 'prob']].reset_index(drop = True)
-spread_prob_grouped_df = spread_prob_df.groupby('from')
-pop_data = pd.read_csv('../src_data/usa_population_revise.csv', dtype ={'GeoId':str, 'Population':np.int64})
+if region_level == 'cbg':
+    spread_prob_df = pd.concat([pd.read_csv('../spread_probability_top30/cbg/%d.csv'%i) for i in range(1,6)],ignore_index=True)
+    spread_prob_df['from'] = spread_prob_df['from'].apply(lambda x: '%012d'%x)
+    spread_prob_df['to'] = spread_prob_df['to'].apply(lambda x: '%012d'%x)
+    spread_prob_df = spread_prob_df[['from', 'to', 'prob']].reset_index(drop = True)
+    spread_prob_grouped_df = spread_prob_df.groupby('from')
+    pop_data = pd.read_csv('../src_data/usa_cbg_population.csv', dtype ={'GeoId':str, 'Population':np.int64})
+elif region_level == 'census_tract':
+    spread_prob_df = pd.read_csv('../spread_probability_top30/tract.csv',  dtype ={'from':str, 'to':str})
+    spread_prob_grouped_df = spread_prob_df.groupby('from')
+    pop_data = pd.read_csv('../src_data/usa_census_tract_population.csv', dtype ={'GeoId':str, 'Population':np.int64})
+else:
+    spread_prob_df = pd.read_csv('../spread_probability_top30/county.csv',  dtype ={'from':str, 'to':str})
+    spread_prob_grouped_df = spread_prob_df.groupby('from')
+    pop_data = pd.read_csv('../src_data/usa_county_population.csv', dtype ={'GeoId':str, 'Population':np.int64})
 
-
-simu_args = [days_of_simulation, list_init_cbg, num_init_cases, infection_chance_per_day, from_des, pop_data,  spread_prob_grouped_df, fn_region, fn_case]
+simu_args = [days_of_simulation, init_region_id, num_init_cases, infection_chance_per_day, from_des, pop_data,  spread_prob_grouped_df, fn_region, fn_case]
 k = 0
 while total_runs > 0:
     while active_count() > num_threads:

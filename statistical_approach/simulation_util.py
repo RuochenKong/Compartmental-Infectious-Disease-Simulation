@@ -38,9 +38,6 @@ def init_spread_from_des(pop_data, starts, num_init_cases, infectious_day, f_reg
     case_level_output_str = 'Day,from_GeoId,from_case,to_GeoId,to_case\n'
     simulation_day = 0
 
-    if type(num_init_cases) == int:
-        num_init_cases = [num_init_cases] * len(starts)
-
     # random initiate spread in 5 regions
     for idx, s in enumerate(starts):
         num_init_cases_refine = min(counter[s][0], num_init_cases[idx])
@@ -75,9 +72,6 @@ def init_spread_from_src(pop_data, starts, num_init_cases, infectious_day, sprea
     region_level_output_str = 'Day,GeoId,Susceptible,Infectious,Recovered\n'
     case_level_output_str = 'Day,from_GeoId,from_case,to_GeoId,to_case\n'
     simulation_day = 0
-
-    if type(num_init_cases) == int:
-        num_init_cases = [num_init_cases] * len(starts)
 
     # random initiate spread in 5 regions
     init_case = {}
