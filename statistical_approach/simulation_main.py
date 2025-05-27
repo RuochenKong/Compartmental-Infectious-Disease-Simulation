@@ -85,9 +85,6 @@ if init_region_id is not None and len(num_init_cases) != len(init_region_id):
     print('len(init_region_id) != len(num_init_cases)')
     exit(1)
 
-if init_region_id is None:
-    airport_df = pd.read_csv('../airport_data_process/airports_GeoId.csv',dtype=str)
-
 
 fn_region = output_dir + 'simu_%d_region_level.csv' if do_region else None
 fn_case = output_dir + 'simu_%d_case_level.csv' if do_case else None
@@ -107,6 +104,27 @@ else:
     spread_prob_df = pd.read_csv('../spread_probability_top30/county.csv',  dtype ={'from':str, 'to':str})
     spread_prob_grouped_df = spread_prob_df.groupby('from')
     pop_data = pd.read_csv('../src_data/usa_county_population.csv', dtype ={'GeoId':str, 'Population':np.int64})
+
+if init_region_id is None:
+    random.seed(seed)
+    if from_random_airports:
+        airport_df = pd.read_csv('../airport_data_process/airports_GeoId.csv',dtype=str)
+        airport_geoids = list(airport_df['GeoId'])
+        random.shuffle(airport_geoids)
+        init_region_id = random.sample(airport_geoids,len(num_init_cases))
+        if region_level == 'census_tract':
+            tmp_id = [geoid[:11] for geoid in init_region_id]
+            init_region_id = tmp_id
+        elif region_level == 'county':
+            tmp_id = [geoid[:5] for geoid in init_region_id]
+            init_region_id = tmp_id
+    else:
+        if from_des:
+            des_ids = spread_prob_df['to'].unique().tolist()
+            init_region_id = random.sample(des_ids,len(num_init_cases))
+        else:
+            src_ids = spread_prob_df['from'].unique().tolist()
+            init_region_id = random.sample(src_ids,len(num_init_cases))
 
 simu_args = [days_of_simulation, init_region_id, num_init_cases, infection_chance_per_day, from_des, pop_data,  spread_prob_grouped_df, fn_region, fn_case]
 k = 0
