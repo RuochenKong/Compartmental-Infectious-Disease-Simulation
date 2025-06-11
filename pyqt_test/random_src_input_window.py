@@ -15,7 +15,9 @@ class RandomSrcInputWindow(QWidget):
         # Main layout for the window
         self.layout = QVBoxLayout(self)
         self.input_line = []
-        self.add_check_box('Starts from random airports')
+
+        self.from_src_checkbox = self.add_check_box('Starts from transitions')
+        self.add_linked_check_box('Starts only from Airports', self.from_src_checkbox)
         self.add_integer_input('Number of source locations')
         self.add_integer_input('Number of cases per location')
 
@@ -54,10 +56,31 @@ class RandomSrcInputWindow(QWidget):
         row_layout.addWidget(description)
         row_layout.addWidget(checkbox)
 
-        print(type(checkbox))
         self.layout.addLayout(row_layout)
         # Store data
         self.input_line.append({'description': description, 'input': checkbox})
+
+        return checkbox
+
+    def add_linked_check_box(self, label, target_checkbox):
+        """Adds a checkbox that when checked, checks the target_checkbox"""
+        row_layout = QHBoxLayout()
+
+        description = QLabel(label)
+        description.setFixedWidth(200)
+        description.setAlignment(Qt.AlignRight)
+
+        linked_checkbox = QCheckBox(self)
+        linked_checkbox.setFixedWidth(50)
+
+        # Connect signal to enforce linked behavior
+        linked_checkbox.toggled.connect(lambda checked: target_checkbox.setChecked(checked))
+
+        row_layout.addWidget(description)
+        row_layout.addWidget(linked_checkbox)
+
+        self.layout.addLayout(row_layout)
+        self.input_line.append({'description': description, 'input': linked_checkbox})
 
     def add_integer_input(self, label):
         row_layout = QHBoxLayout()
@@ -82,15 +105,20 @@ class RandomSrcInputWindow(QWidget):
     def save_input(self):
         filepath = 'GUI_params/random_source'
 
-        from_airports = ''
+        from_des = ''
+        from_random_airports = ''
         cases = 0
         places = 0
         for row in self.input_line:
             description = row['description'].text()
             input_data = row['input']
 
-            if isinstance(input_data, QCheckBox):
-                from_airports = 'True' if input_data.isChecked() else 'False'
+            if description == 'Starts from transitions':
+                from_des = 'False' if input_data.isChecked() else 'True'
+                continue
+
+            if description == 'Starts only from Airports':
+                from_random_airports = 'True' if input_data.isChecked() else 'False'
                 continue
 
             if description == 'Number of source locations':
@@ -99,7 +127,8 @@ class RandomSrcInputWindow(QWidget):
                 cases = input_data.value()
 
         with open(filepath,'w') as f:
-            f.write('from_airport=%s\n'%from_airports)
+            f.write('from_des=%s\n'%from_des)
+            f.write('from_random_airports=%s\n'%from_random_airports)
             f.write('num_init_cases=%s'%('/'.join([str(cases)] * places)))
 
         self.show_save_popup(filepath)

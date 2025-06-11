@@ -30,6 +30,21 @@ def get_random_des(des_prob_df):
         if rand_val < prob: return des
     return des_prob_df.loc[-1,'to']
 
+# Get a CBG where the infected case will visit
+def get_random_flow_des(src_df):
+    randval = rand.random()
+    cumprob = src_df['des_prob'].cumsum()
+    sumprob = src_df['des_prob'].sum()
+    if sumprob == 0: return
+    randval *= sumprob
+    checkprob = 0
+    for des, prob in zip(src_df['poi_cbg_destination'], cumprob):
+        if checkprob == prob:
+            continue
+        if randval < prob:
+            return des
+    return src_df.loc[-1, 'poi_cbg_destination']
+
 def init_spread_from_des(pop_data, starts, num_init_cases, infectious_day, f_region, f_case):
     # starts = ['250092524002', '361190111013', '270530257013', '360650228002', '261635154001']
     active_case = {}
@@ -65,8 +80,7 @@ def init_spread_from_des(pop_data, starts, num_init_cases, infectious_day, f_reg
 
     return active_case, counter, total_case_tracker
 
-def init_spread_from_src(pop_data, starts, num_init_cases, infectious_day, spread_prob_grouped_df, f_region, f_case):
-    # starts = ['250092524002', '361190111013', '270530257013', '360650228002', '261635154001']
+def init_spread_from_src(pop_data, starts, num_init_cases, infectious_day, group_by_src, f_region, f_case):
     active_case = {}
     counter,total_case_tracker = init_counter(pop_data)
     region_level_output_str = 'Day,GeoId,Susceptible,Infectious,Recovered\n'
@@ -77,32 +91,15 @@ def init_spread_from_src(pop_data, starts, num_init_cases, infectious_day, sprea
     init_case = {}
     for idx, s in enumerate(starts):
         num_init_case_s = num_init_cases[idx]
-        des_prob_df = spread_prob_grouped_df.get_group(s)
-        if num_init_case_s < 30:
-            for _ in range(num_init_case_s):
-                des_cbg = get_random_des(des_prob_df)
-                if total_case_tracker[des_cbg][1] == total_case_tracker[des_cbg][0]: continue
-                if des_cbg not in init_case: init_case[des_cbg] = 0
-                init_case[des_cbg] += 1
-                total_case_tracker[des_cbg][1] += 1
-                counter[des_cbg][0] -= 1
-                counter[des_cbg][1] += 1
-        else:
-            for des_idx in des_prob_df.index:
-                des_cbg = des_prob_df.loc[des_idx,'to']
-                des_susceptible = counter[des_cbg][0]
-                if des_susceptible == 0: continue # No susceptible population
-
-                des_prob = des_prob_df.loc[des_idx,'prob']
-                new_case_in_des = np.random.poisson(num_init_case_s * des_prob)
-                new_case_in_des = min(des_susceptible, new_case_in_des)
-
-                if des_cbg not in init_case: init_case[des_cbg] = 0
-                init_case[des_cbg] += new_case_in_des
-                total_case_tracker[des_cbg][1] += new_case_in_des
-
-                counter[des_cbg][0] -= new_case_in_des
-                counter[des_cbg][1] += new_case_in_des
+        src_df = group_by_src.get_group(s)
+        for _ in range(num_init_case_s):
+            des_cbg = get_random_flow_des(src_df)
+            if total_case_tracker[des_cbg][1] == total_case_tracker[des_cbg][0]: continue
+            if des_cbg not in init_case: init_case[des_cbg] = 0
+            init_case[des_cbg] += 1
+            total_case_tracker[des_cbg][1] += 1
+            counter[des_cbg][0] -= 1
+            counter[des_cbg][1] += 1
 
     for cbg, case in init_case.items():
         active_case[cbg] = [[0] * infectious_day, [0] * infectious_day]
@@ -170,7 +167,6 @@ def next_day(simulation_day, active_case, counter, total_case_tracker, spread_pr
                             des_cbg = get_random_des(des_prob_df)
                             reduce_prob = total_case_tracker[des_cbg][1]/total_case_tracker[des_cbg][0]
                             if counter[des_cbg][0] == 0 or rand.random() < reduce_prob: continue # Assume spread to an already infected person
-                            if counter[des_cbg][0] == 0: continue # Assume spread to an already infected person
                             if des_cbg not in new_cases: new_cases[des_cbg] = 0
                             new_cases[des_cbg] += 1
                             total_case_tracker[des_cbg][1] += 1
@@ -269,8 +265,9 @@ def next_day(simulation_day, active_case, counter, total_case_tracker, spread_pr
 
     return region_level_output_str, case_level_output_str
 
-def main(days_of_simulation, init_cbgs, num_init_cases, infection_chance_per_day, from_des, pop_data,  spread_prob_grouped_df, fn_region, fn_case, simu_id, seed):
-    print('Simu #%d started at %s'%(simu_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+def main(days_of_simulation, init_cbgs, num_init_cases, infection_chance_per_day, from_des, pop_data,  spread_prob_grouped_df, group_by_src, fn_region, fn_case, simu_id, seed):
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]   Simu #{simu_id} start.")
+    start_time = time.time()
     init_random_seed(seed)
     f_region = open(fn_region%simu_id, 'w') if fn_region is not None else None
     f_case = open(fn_case%simu_id, 'w') if fn_case is not None else None
@@ -278,9 +275,17 @@ def main(days_of_simulation, init_cbgs, num_init_cases, infection_chance_per_day
     if from_des:
         active_case, counter, total_case_tracker = init_spread_from_des(pop_data, init_cbgs, num_init_cases, infectious_day, f_region, f_case)
     else:
-        active_case, counter, total_case_tracker = init_spread_from_src(pop_data, init_cbgs, num_init_cases, infectious_day, spread_prob_grouped_df, f_region, f_case)
+        active_case, counter, total_case_tracker = init_spread_from_src(pop_data, init_cbgs, num_init_cases, infectious_day, group_by_src, f_region, f_case)
     for simu_day in range(days_of_simulation):
         next_day(simu_day+1, active_case, counter, total_case_tracker, spread_prob_grouped_df, infectious_day, infection_chance_per_day, f_region, f_case)
     if f_region is not None: f_region.close()
     if f_case is not None: f_case.close()
-    print('Simu #%d ended at %s'%(simu_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+    end_time = time.time()
+    tot_case = 0
+    tot_cbg = 0
+    for cbg in total_case_tracker.keys():
+        tot_case += total_case_tracker[cbg][1]
+        if total_case_tracker[cbg][1] != 0: tot_cbg += 1
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]   Simu #{simu_id} finish.",
+          f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]    -- Running time: {end_time-start_time:.4f} seconds for {days_of_simulation} days of simulation,"
+          f" with {tot_case} total cases among {tot_cbg} regions.")

@@ -1,33 +1,33 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QCheckBox, QVBoxLayout
 
-class DynamicInputApp(QWidget):
+class MyWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.init_ui()
+        self.setWindowTitle("Checkbox Example")
 
-    def init_ui(self):
-        # Create the main layout
-        self.layout = QVBoxLayout()
+        # Create the checkboxes
+        self.checkbox1 = QCheckBox("Show another checkbox", self)
+        self.checkbox2 = QCheckBox("Hidden checkbox", self)
+        self.checkbox2.setVisible(False)  # Initially hide the second checkbox
 
-        # Create and add the button to the layout
-        self.button = QPushButton("Add Input Line")
-        self.button.clicked.connect(self.add_input_line)
-        self.layout.addWidget(self.button)
+        # Layout
+        layout = QVBoxLayout()
+        layout.addWidget(self.checkbox1)
+        layout.addWidget(self.checkbox2)
+        self.setLayout(layout)
 
-        # Set the layout for the main window
-        self.setLayout(self.layout)
+        # Connect signal
+        self.checkbox1.stateChanged.connect(self.toggle_checkbox2)
 
-        self.setWindowTitle("Dynamic Input Lines")
-        self.setGeometry(100, 100, 300, 200)
+    def toggle_checkbox2(self, state):
+        """Toggles visibility of the second checkbox based on the first checkbox's state."""
+        if state == 2:  # 2 corresponds to checked
+            self.checkbox2.setVisible(True)
+        else:
+            self.checkbox2.setVisible(False)
 
-    def add_input_line(self):
-        # Create a new QLineEdit and add it to the layout
-        new_input = QLineEdit()
-        self.layout.addWidget(new_input)
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = DynamicInputApp()
+if __name__ == '__main__':
+    app = QApplication([])
+    window = MyWindow()
     window.show()
-    sys.exit(app.exec_())
+    app.exec_()

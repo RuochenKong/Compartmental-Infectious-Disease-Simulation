@@ -19,8 +19,9 @@ DES2PARAM = {'Random Seed': 'seed',
              'Number of total runs': 'total_runs',
              'Number of threads': 'num_threads',
              'Output Directory': 'output_dir',
-             'Save spreading history': 'do_spread',
-             'Save logging information': 'do_log'}
+             'Census region level':'region_level',
+             'Save region level output': 'do_region',
+             'Save case level output': 'do_case'}
 
 class InputPlatform(QWidget):
     def __init__(self):
@@ -45,10 +46,11 @@ class InputPlatform(QWidget):
         self.add_integer_input('Number of total runs',1)
         self.add_integer_input('Number of threads',1)
         self.add_r0_input()
+        self.add_region_level_row()
         self.add_infectious_source_input()
 
-        self.add_check_box('Save spreading history')
-        self.add_check_box('Save logging information')
+        self.add_check_box('Save region level output')
+        self.add_check_box('Save case level output')
 
         self.add_output_dir_input()
 
@@ -57,10 +59,8 @@ class InputPlatform(QWidget):
         self.save_button.clicked.connect(self.save_to_file)
         self.layout.addWidget(self.save_button)
 
-        # Run button
-        self.run_button = QPushButton("Start simulation")
-        self.run_button.clicked.connect(self.run_simulation)
-        self.layout.addWidget(self.run_button)
+        # Select Type of Approach and Run
+        self.add_approach_run_row()
 
         # Set layout
         self.setLayout(self.layout)
@@ -109,13 +109,53 @@ class InputPlatform(QWidget):
         description.setAlignment(Qt.AlignRight)
 
         combo_box = QComboBox(self)
-        combo_box.addItems(["Select an option", "Random", "Airports"])
+        combo_box.addItems(["Select an option", "Random", "Specified Airports"])
         combo_box.setFixedWidth(150)
 
         combo_box.currentIndexChanged.connect(self.handle_selection)
 
         row_layout.addWidget(description)
         row_layout.addWidget(combo_box)
+        self.layout.addLayout(row_layout)
+
+        self.input_line.append({'description': description, 'input': combo_box})
+
+    def add_approach_run_row(self):
+        row_layout = QHBoxLayout()
+
+        description = QLabel("Approach Type")
+        description.setFixedWidth(130)
+        # description.setAlignment(Qt.AlignRight)
+
+        combo_box = QComboBox(self)
+        combo_box.addItems(["Select an option", "Naive", "Statistical"])
+        combo_box.setFixedWidth(150)
+
+        run_button = QPushButton("Start simulation")
+        run_button.clicked.connect(self.run_simulation)
+
+        row_layout.addWidget(description)
+        row_layout.addWidget(combo_box)
+        row_layout.addWidget(run_button)
+
+        self.layout.addLayout(row_layout)
+
+        self.input_line.append({'description': description, 'input': combo_box})
+
+    def add_region_level_row(self):
+        row_layout = QHBoxLayout()
+
+        description = QLabel("Census region level")
+        description.setFixedWidth(300)
+        description.setAlignment(Qt.AlignRight)
+
+        combo_box = QComboBox(self)
+        combo_box.addItems(["Select an option", "Census Block Group", "Census Tract", 'County'])
+        combo_box.setFixedWidth(150)
+
+        row_layout.addWidget(description)
+        row_layout.addWidget(combo_box)
+
         self.layout.addLayout(row_layout)
 
         self.input_line.append({'description': description, 'input': combo_box})
@@ -199,7 +239,31 @@ class InputPlatform(QWidget):
 
     def run_simulation(self):
         # subprocess.Popen(["python", "mkypox_main.py"])
-        print('Not yet implemented')
+        approach_type = None
+        for row in self.input_line:
+            description = row['description'].text()
+            if description == 'Approach Type':
+                input_value = row['input']
+                approach_type = input_value.currentText()
+                if approach_type == 'Select an option':
+                    approach_type = None
+                break
+        if approach_type is None:
+            self.show_invalid_input_error('Missing Simulation Setup', 'No Approach Type Selected')
+            return
+        simulation_path = '../%s_approach/simulation_main.py'%approach_type.lower()
+        param_path = 'GUI_params/params'
+        try:
+            # Blocking call, waits for simulation to finish
+            result = subprocess.run(["python", simulation_path, param_path], capture_output=True)
+
+            if result.returncode == 0:
+                self.show_message("Simulation Complete", "The simulation has finished successfully.")
+            else:
+                self.show_invalid_input_error("Simulation Failed", result.stderr)
+
+        except Exception as e:
+            self.show_invalid_input_error("Execution Error", str(e))
 
     def save_to_file(self):
 
@@ -221,16 +285,17 @@ class InputPlatform(QWidget):
             elif isinstance(input_value, QCheckBox):
                 input_value = 'True' if input_value.isChecked() else 'False'
             elif isinstance(input_value, QLineEdit):
-                input_value = input_value.text().strip()
+                input_value = input_value.text()
                 if input_value == '':
                     input_value = 'output'
+                input_value = '../'+input_value
             elif isinstance(input_value, QPushButton):  # This is R0 input
                 if not os.path.exists('GUI_params/R0'):
                     self.show_invalid_input_error('Missing parameters', 'No input for spread chance')
                     return
                 with open('GUI_params/R0') as f:
                     r0_file = f.read().strip()
-            elif isinstance(input_value, QComboBox):  # This is source places
+            elif description == 'Spread source':  # This is source places
                 if input_value.currentText() == 'Select an option':
                     self.show_invalid_input_error('Missing parameters', 'No input for disease sources')
                     return
@@ -246,7 +311,17 @@ class InputPlatform(QWidget):
                         return
                     with open('GUI_params/airport_sources') as f:
                         src_file = f.read().strip()
-
+            elif description == 'Census region level':  # This is source places
+                if input_value.currentText() == 'Select an option':
+                    self.show_invalid_input_error('Missing parameters', 'No input for Census region level')
+                    return
+                input_value = input_value.currentText()
+                if input_value == 'Census Block Group':
+                    input_value = 'cbg'
+                elif input_value == 'Census Tract':
+                    input_value = 'census_tract'
+                else:
+                    input_value = 'county'
             if label is not None:
                 output_lines.append(label +'='+input_value)
 
@@ -256,8 +331,6 @@ class InputPlatform(QWidget):
             f.write('\n' + src_file)
 
         self.show_save_popup(filepath)
-
-
 
     def show_invalid_input_error(self, main_text, informative_text):
         error_popup = QMessageBox(self)
@@ -274,6 +347,15 @@ class InputPlatform(QWidget):
         message_box.setFixedWidth(300)
         message_box.setWindowTitle("Save Successful")
         message_box.setText(f"Data has been saved to:\n{file_path}")
+        message_box.setStandardButtons(QMessageBox.Ok)
+        message_box.exec_()
+
+    def show_message(self, title, msg):
+        # Create a QMessageBox to display the saving path
+        message_box = QMessageBox()
+        message_box.setFixedWidth(300)
+        message_box.setWindowTitle(title)
+        message_box.setText(msg)
         message_box.setStandardButtons(QMessageBox.Ok)
         message_box.exec_()
 

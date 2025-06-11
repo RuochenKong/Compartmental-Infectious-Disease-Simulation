@@ -1,0 +1,14 @@
+[2025-06-10 16:06:04]: Parameter Parsing and Source Data Loading start.
+[2025-06-10 16:06:18] Parsing and Loading finish, taking 13.9423 seconds.
+[2025-06-10 16:06:18]     Simu #0 start.
+[2025-06-10 16:06:18]     Simu #1 start.
+[2025-06-10 16:06:18]     Simu #2 start.
+[2025-06-10 16:06:18]     Simu #3 start.
+[2025-06-10 16:06:28]     Simu #2 finish. 
+[2025-06-10 16:06:28]      -- Running time: 9.4948 seconds for 20 days of simulation, with 714 total cases among 333 regions.
+[2025-06-10 16:06:28]     Simu #0 finish. 
+[2025-06-10 16:06:28]      -- Running time: 9.6155 seconds for 20 days of simulation, with 834 total cases among 344 regions.
+[2025-06-10 16:06:28]     Simu #3 finish. 
+[2025-06-10 16:06:28]      -- Running time: 9.6888 seconds for 20 days of simulation, with 754 total cases among 373 regions.
+[2025-06-10 16:06:28]     Simu #1 finish. 
+[2025-06-10 16:06:28]      -- Running time: 9.7494 seconds for 20 days of simulation, with 1218 total cases among 460 regions.
