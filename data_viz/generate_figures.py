@@ -50,7 +50,7 @@ data_df['Infected'] = data_df['Infectious'] + data_df['Recovered']
 data_df = data_df.drop_duplicates(subset=['GeoId','Infected'])
 data_df = data_df.groupby(['Day', 'GeoId']).sum().reset_index()
 
-max_infected = data_df['Infected'].max() * 2
+max_infected = data_df['Infected'].max()
 
 pop_data = pd.read_csv(pop_fn%region_level, dtype={'GeoId':str})
 pop_data['Infected-plot'] = 0
@@ -65,7 +65,7 @@ for d in range(len(data_df['Day'].unique())):
     plot_data['GeoId'] = plot_data['GeoId'].apply(lambda x: x[:5])
     plot_data = plot_data.groupby('GeoId')[['Population','Infected']].sum().reset_index()
     prob_map_df = map_df.merge(plot_data, left_on='GEOID', right_on='GeoId', how = 'left').fillna(0)
-    prob_map_df.plot(column='Infected', cmap='Blues', ax = ax, linewidth = 0.1, legend=True , vmin=0, vmax=max_infected, legend_kwds={'shrink': 0.5, 'orientation':'horizontal'})
+    prob_map_df.plot(column='Infected', cmap='Blues',  edgecolor='#082657', ax = ax, linewidth = 0.1, legend=True , vmin=0, vmax=max_infected, legend_kwds={'shrink': 0.5, 'orientation':'horizontal'})
     ax.axis('off')
     ax.set_title(f'Day {d}', fontsize=16)
 

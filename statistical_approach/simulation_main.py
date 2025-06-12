@@ -104,13 +104,13 @@ fn_region = output_dir + 'simu_%d_region_level.csv' if do_region else None
 fn_case = output_dir + 'simu_%d_case_level.csv' if do_case else None
 
 if region_level == 'cbg':
-    spread_prob_df = pd.concat([pd.read_csv('../spread_probability_top30/cbg/%d.csv'%i, dtype ={'from':str, 'to':str}) for i in range(1,6)],ignore_index=True)
+    spread_prob_df = pd.concat([pd.read_csv('../src_data/spread_probability_top30/cbg/%d.csv'%i, dtype ={'from':str, 'to':str}) for i in range(1,6)],ignore_index=True)
     pop_data = pd.read_csv('../src_data/usa_cbg_population.csv', dtype ={'GeoId':str, 'Population':np.int64})
 elif region_level == 'census_tract':
-    spread_prob_df = pd.read_csv('../spread_probability_top30/tract.csv', dtype ={'from':str, 'to':str})
+    spread_prob_df = pd.read_csv('../src_data/spread_probability_top30/tract.csv', dtype ={'from':str, 'to':str})
     pop_data = pd.read_csv('../src_data/usa_census_tract_population.csv', dtype ={'GeoId':str, 'Population':np.int64})
 else:
-    spread_prob_df = pd.read_csv('../spread_probability_top30/county.csv', dtype ={'from':str, 'to':str})
+    spread_prob_df = pd.read_csv('../src_data/spread_probability_top30/county.csv', dtype ={'from':str, 'to':str})
     pop_data = pd.read_csv('../src_data/usa_county_population.csv', dtype ={'GeoId':str, 'Population':np.int64})
 spread_prob_grouped_df = spread_prob_df.groupby('from')
 
