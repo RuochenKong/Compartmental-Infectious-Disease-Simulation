@@ -5,3 +5,6 @@ src_data
 *.csv
 *.log
 raw_census_data
+*.png
+*.gif
+*_log

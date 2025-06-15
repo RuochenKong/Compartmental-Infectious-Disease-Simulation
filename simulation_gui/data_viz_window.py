@@ -16,7 +16,7 @@ class DataVizWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Data Vizualization")
-        self.setGeometry(100, 100, 500, 200)
+        self.setGeometry(100, 100, 600, 200)
 
         self.process = QProcess(self)
         self.process.finished.connect(self.on_finished)
@@ -77,7 +77,7 @@ class DataVizWindow(QWidget):
         row_layout = QHBoxLayout()
 
         description = QLabel(text)
-        description.setFixedWidth(150)
+        description.setFixedWidth(200)
 
         folder_button = QPushButton("Select Folder")
         folder_button.setFixedWidth(150)
@@ -112,7 +112,7 @@ class DataVizWindow(QWidget):
         row_layout = QHBoxLayout()
 
         description = QLabel('Simulation id')
-        description.setFixedWidth(150)
+        description.setFixedWidth(200)
 
         input_line = QSpinBox(self)
         input_line.setMinimum(0)

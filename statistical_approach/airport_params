@@ -1,0 +1,11 @@
+init_region_id=170319801001/482019801001/360810716001/120869805001/40131138021
+num_init_cases=100/100/100/100/100
+from_des=False
+seed=0
+days_of_simulation=360
+total_runs=4
+num_threads=4
+region_level=county
+do_region=True
+output_dir=/mnt/d/projects/mkypox/airport_example
+infection_chance_per_day=0.1/0.2/0.3/0.2/0.1/0.1/0.1

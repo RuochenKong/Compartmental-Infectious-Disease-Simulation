@@ -1,0 +1,8 @@
+num_init_cases=10/10/10/10/10
+from_des=True
+seed=0
+days_of_simulation=360
+total_runs=16
+num_threads=4
+region_level=cbg
+infection_chance_per_day=0.1/0.2/0.3/0.2/0.1/0.1/0.1

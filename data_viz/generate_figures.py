@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
-from PIL import Image
+from PIL import Image,ImageOps
 
 data_dir = None
 simu_id = None
@@ -50,7 +50,7 @@ data_df['Infected'] = data_df['Infectious'] + data_df['Recovered']
 data_df = data_df.drop_duplicates(subset=['GeoId','Infected'])
 data_df = data_df.groupby(['Day', 'GeoId']).sum().reset_index()
 
-max_infected = data_df['Infected'].max()
+# max_infected = data_df['Infected'].max()
 
 pop_data = pd.read_csv(pop_fn%region_level, dtype={'GeoId':str})
 pop_data['Infected-plot'] = 0
@@ -64,8 +64,12 @@ for d in range(len(data_df['Day'].unique())):
 
     plot_data['GeoId'] = plot_data['GeoId'].apply(lambda x: x[:5])
     plot_data = plot_data.groupby('GeoId')[['Population','Infected']].sum().reset_index()
+    plot_data['Percent-Infected'] = plot_data['Infected']/plot_data['Population']
     prob_map_df = map_df.merge(plot_data, left_on='GEOID', right_on='GeoId', how = 'left').fillna(0)
-    prob_map_df.plot(column='Infected', cmap='Blues',  edgecolor='#082657', ax = ax, linewidth = 0.1, legend=True , vmin=0, vmax=max_infected, legend_kwds={'shrink': 0.5, 'orientation':'horizontal'})
+    percentiles_I = plot_data[plot_data['Infected'] != 0]['Infected'].quantile(0.95)
+    percentiles_I = max(1,percentiles_I)
+    prob_map_df.plot(column='Infected', cmap='Blues',  edgecolor='#082657', ax = ax, linewidth = 0.1, legend=True , vmin=0, vmax = percentiles_I, legend_kwds={'shrink': 0.25})
+    # prob_map_df.plot(column='Infected', cmap='Blues',  edgecolor='#082657', ax = ax, linewidth = 0.1, legend=True , vmin=0, vmax = 10000, legend_kwds={'shrink': 0.5, 'orientation':'horizontal'})
     ax.axis('off')
     ax.set_title(f'Day {d}', fontsize=16)
 
@@ -74,12 +78,16 @@ for d in range(len(data_df['Day'].unique())):
     fig.savefig(fig_fn, bbox_inches="tight")
     plt.close(fig)
 
+
 gif_fn = figure_dir[:-1] + '.gif'
-images = [Image.open(fig_fn) for fig_fn in output_figures]
+images_ori = [Image.open(fig_fn) for fig_fn in output_figures]
+target_size = images_ori[-1].size
+images = [ImageOps.pad(img, target_size, color ='white') for img in images_ori]
+
 images[0].save(
     gif_fn,
     save_all=True,
     append_images=images[1:],
-    duration=200,
+    duration=60,
     loop=0
 )

@@ -118,15 +118,9 @@ group_by_des = transport_data.groupby('poi_cbg_destination')
 if init_region_id is None:
     random.seed(seed)
     if from_random_airports:
-        airport_df = pd.read_csv('../airport_data_process/airports_GeoId.csv',dtype=str)
+        airport_df = pd.read_csv('../data_process_scripts/airport_data_process/airports_GeoId.csv', dtype=str)
         airport_geoids = list(airport_df['GeoId'])
         init_region_id = random.sample(airport_geoids,len(num_init_cases))
-        if region_level == 'census_tract':
-            tmp_id = [geoid[:11] for geoid in init_region_id]
-            init_region_id = tmp_id
-        elif region_level == 'county':
-            tmp_id = [geoid[:5] for geoid in init_region_id]
-            init_region_id = tmp_id
     else:
         if from_des:
             des_ids = list(group_by_des.groups.keys())
@@ -134,6 +128,13 @@ if init_region_id is None:
         else:
             src_ids = list(group_by_src.groups.keys())
             init_region_id = random.sample(src_ids,len(num_init_cases))
+
+if region_level == 'census_tract':
+    tmp_id = [geoid[:11] for geoid in init_region_id]
+    init_region_id = tmp_id
+elif region_level == 'county':
+    tmp_id = [geoid[:5] for geoid in init_region_id]
+    init_region_id = tmp_id
 
 end_time = time.time()
 print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Parsing and Loading finish, taking {end_time-start_time:.4f} seconds.")

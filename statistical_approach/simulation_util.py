@@ -209,7 +209,7 @@ def next_day(simulation_day, active_case, counter, total_case_tracker, spread_pr
                     expected_new_case_in_des = expected_new_case * des_prob * (1-reduce_prob)
                     # expected_new_case_in_des = expected_new_case * des_prob
 
-                    if expected_new_case_in_des < 5: # Poisson distribution
+                    if expected_new_case_in_des < 5 or des_prob < 0.05: # Poisson distribution
                         actual_new_case_in_des = np.random.poisson(expected_new_case_in_des)
                     else: # Normal distribution
                         actual_new_case_in_des = np.random.normal(expected_new_case_in_des, expected_new_case_in_des* (1-des_prob))

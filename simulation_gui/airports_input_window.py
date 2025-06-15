@@ -41,7 +41,7 @@ class AirportInputWindow(QWidget):
         self.setLayout(self.main_layout)
 
         self.setWindowTitle("Disease Input Airports")
-        self.setGeometry(100, 100, 500, 100)
+        self.setGeometry(100, 100, 700, 100)
         self.center()  # Call the method to center the widget
 
     def center(self):
@@ -52,7 +52,7 @@ class AirportInputWindow(QWidget):
         # Calculate the center point of the screen
         screen_center = screen_geometry.center()
         screen_center.setY(max(100, screen_center.y() - 300))
-        screen_center.setX(max(100, screen_center.x() + 600))
+        screen_center.setX(max(100, screen_center.x() + 700))
 
         # Move the window's center to the screen's center
         window_geometry.moveCenter(screen_center)
@@ -73,7 +73,6 @@ class AirportInputWindow(QWidget):
 
         # Description
         description_label = QLabel("Select an airport")
-        description_label.setAlignment(Qt.AlignRight | Qt.AlignTop)  # Align text to the right & Top
         description_label.setStyleSheet("color: blue;")  # Set text color to red
         description_label.setWordWrap(True)
 
@@ -87,6 +86,7 @@ class AirportInputWindow(QWidget):
 
         input_line = QSpinBox(self)
         input_line.setMinimum(1)
+        input_line.setMaximum(1000)
         input_line.setFixedWidth(100)
 
         # update description
