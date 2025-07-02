@@ -8,3 +8,4 @@ raw_census_data
 *.png
 *.gif
 *_log
+data_process_scripts
