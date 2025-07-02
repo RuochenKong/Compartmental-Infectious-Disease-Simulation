@@ -45,6 +45,7 @@ The sample data preprocessig scripts are available in folder [data_process_scrip
 
 Fot the efficient ***statistical approach***, the simulation is based on a further calculated spread probability matrix from the flow data, 
 available in [src_data/spread_probability_top30](src_data/spread_probability_top30). The following is the sample of how to calculate this matrix.
+
 <img src="paper_figures/spread_prob_example.png" width="500"/>
 
 The data processing file is also available in [data_process_scripts](data_process_scripts) for whom interested to run the simulation with a different flow data.
