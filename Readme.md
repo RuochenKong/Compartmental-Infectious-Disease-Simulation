@@ -1,7 +1,7 @@
 # Overview
 
 This repository is the compartmental infectious disease simulation described in the paper
-***"EpiScale: Large-Scale Simulation of Infectious Disease Based on Human Mobility \[Demo\]"*** currently under review.
+***"EpiScale: Large-Scale Simulation of Infectious Disease Based on Human Mobility \[Demo\]"*** published on SIGSPATIAL'25. [https://doi.org/10.1145/3748636.3762791](https://doi.org/10.1145/3748636.3762791)
 
 In this demonstration, we present a **large-scale, compartmental infectious disease spread simulation** framework 
 designed to model disease dynamics across the entire United States at three different spatial resolutions: 
